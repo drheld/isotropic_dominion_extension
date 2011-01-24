@@ -3,9 +3,12 @@ var special_counts = new Object();
 
 var scores = new Object();
 var decks = new Object();
+var set_aside = new Object();
+var native_village = new Object();
 
 var deck_spot;
 var points_spot;
+var set_aside_spot;
 var started = false;
 var last_player = "";
 var last_reveal_card = "";
@@ -52,6 +55,29 @@ function gainCard(player, card, count) {
 
   changeScore(player, pointsForCard(card) * count);
   decks[player] = decks[player] + count;
+}
+
+function setAside(player, count, isNativeVillage) {
+  if (player == null) return;
+  count = parseInt(count);
+  
+  if (typeof decks[player] == "undefined") {
+    decks[player] = 10;
+  }
+
+  if (typeof set_aside[player] == "undefined") {
+    set_aside[player] = 0;
+  }
+
+  if (typeof native_village[player] == "undefined") {
+    native_village[player] = 0;
+  }
+
+  decks[player] = decks[player] - count;
+  set_aside[player] = set_aside[player] + count;
+  if (isNativeVillage) {
+    native_village[last_player] = native_village[last_player] + count;
+  }
 }
 
 function findTrailingPlayer(text) {
@@ -142,8 +168,35 @@ function maybeHandleTrashing(elems, text, text_arr) {
   return false;
 }
 
+function maybeHandleSetAside(text) {
+  // Handle Island
+  if (text.indexOf("set aside the") != -1 ||
+      text.indexOf("setting aside the") != -1) {
+    count = 2;
+    setAside(last_player, count, false);
+    return true;
+  }
+
+  // Handle Native Village
+  if (text.indexOf("and add it to the") != -1 ||
+      text.indexOf("placing it on the") != -1) {
+    count = 1;
+    setAside(last_player, count, true);
+    return true;
+  }
+  if (text.indexOf("put the mat contents into") != -1 ||
+      text.indexOf("from the Native Village mat") != -1) {
+    count = native_village[last_player];
+    setAside(last_player, -count, true);
+    native_village[last_player] = 0;
+    return true;
+  }
+
+  return false;
+}
+
 function maybeHandleVp(text) {
-  var re = new RegExp("[+]([0-9]+) ▼");
+  var re = new RegExp("[+]([0-9]+) â–¼");
   var arr = (text.match(re));
   if (arr != null && arr.length == 2) {
     changeScore(last_player, arr[1]);
@@ -163,6 +216,8 @@ function getCardCount(card, text) {
 function handleLogEntry(node) {
   // Gaining VP could happen in combination with other stuff.
   maybeHandleVp(node.innerText);
+
+  if (maybeHandleSetAside(node.innerText)) return;
 
   elems = node.getElementsByTagName("span");
   if (elems.length == 0) {
@@ -244,22 +299,40 @@ function updateDeck() {
   deck_spot.innerHTML = print_deck;
 }
 
+function updateSetAside() {
+  if (set_aside_spot == undefined) return;
+  var print_set_aside = "Set Aside: "
+  for (var aside in set_aside) {
+    print_set_aside = print_set_aside + " " + aside + "=" + set_aside[aside];
+  }
+  set_aside_spot.innerHTML = print_set_aside;
+}
+
 function initialize() {
   started = true;
   special_counts = new Object();
   scores = new Object();
   decks = new Object();
+  set_aside = new Object();
 
   updateScores();
   updateDeck();
+  updateSetAside();
 }
 
 function handle(doc) {
   if (doc.constructor == HTMLDivElement &&
       doc.innerText.indexOf("Say") == 0) {
     initialize();
-    deck_spot = doc.children[5];
-    points_spot = doc.children[6];
+    //deck_spot = doc.children[5];
+    //points_spot = doc.children[6];
+    ////set_aside_spot = doc.children[7];
+    deck_spot = document.createElement("div");
+    points_spot = document.createElement("div");
+    set_aside_spot = document.createElement("div");
+    doc.appendChild(deck_spot);
+    doc.appendChild(points_spot);
+    doc.appendChild(set_aside_spot);
   }
 
   if (doc.constructor == HTMLElement && doc.parentNode.id == "log" &&
@@ -274,6 +347,7 @@ function handle(doc) {
   if (started) {
     updateScores();
     updateDeck();
+    updateSetAside();
   }
 }
 
