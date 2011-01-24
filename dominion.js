@@ -204,7 +204,7 @@ function maybeHandleSetAside(text) {
 }
 
 function maybeHandleVp(text) {
-  var re = new RegExp("[+]([0-9]+) â–¼");
+  var re = new RegExp("[+]([0-9]+) ▼");
   var arr = (text.match(re));
   if (arr != null && arr.length == 2) {
     changeScore(last_player, arr[1]);
