@@ -4,6 +4,7 @@ dominion.isotropic.org.
 The extension keeps track of:
 - # of cards each player has
 - # of points each player has
+- # of cards each players has set aside
 
 These are displayed in the bottom beside the chat box.
 
