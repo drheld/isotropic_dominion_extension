@@ -5,6 +5,7 @@ var scores = new Object();
 var decks = new Object();
 var set_aside = new Object();
 var native_village = new Object();
+var gardens = new Object();
 
 var deck_spot;
 var points_spot;
@@ -41,6 +42,9 @@ function changeScore(player, points) {
   if (typeof scores[player] == "undefined") {
     scores[player] = 3;
   }
+  if (typeof gardens[player] == "undefined") {
+    gardens[player] = 0;
+  }
   points = parseInt(points);
   scores[player] = scores[player] + points;
 }
@@ -51,6 +55,10 @@ function gainCard(player, card, count) {
 
   if (typeof decks[player] == "undefined") {
     decks[player] = 10;
+  }
+
+  if (card.indexOf("Gardens") == 0) {
+    gardens[player] = gardens[player] + count;
   }
 
   changeScore(player, pointsForCard(card) * count);
@@ -285,7 +293,8 @@ function updateScores() {
   if (points_spot == undefined) return;
   var print_scores = "Points: "
   for (var score in scores) {
-    print_scores = print_scores + " " + score + "=" + scores[score];
+    var this_score = scores[score] + (Math.floor(decks[score] / 10) * gardens[score]);
+    print_scores = print_scores + " " + score + "=" + this_score;
   }
   points_spot.innerHTML = print_scores;
 }
@@ -314,6 +323,7 @@ function initialize() {
   scores = new Object();
   decks = new Object();
   set_aside = new Object();
+  gardens = new Object();
 
   updateScores();
   updateDeck();
@@ -324,9 +334,6 @@ function handle(doc) {
   if (doc.constructor == HTMLDivElement &&
       doc.innerText.indexOf("Say") == 0) {
     initialize();
-    //deck_spot = doc.children[5];
-    //points_spot = doc.children[6];
-    ////set_aside_spot = doc.children[7];
     deck_spot = document.createElement("div");
     points_spot = document.createElement("div");
     set_aside_spot = document.createElement("div");
