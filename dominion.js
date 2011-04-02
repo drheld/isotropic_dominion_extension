@@ -269,7 +269,7 @@ function maybeHandleSwindler(elems, text) {
 
   if (player != null) {
     if (elems.length == 2) {
-      player.gainCard(elems[0], -1);
+      //the trashing comes from the saboteur code
       player.gainCard(elems[1], 1);
     } else {
       alert("Replacing your has " + elems.length + " elements: " + text);
@@ -322,6 +322,7 @@ function maybeHandleSaboteur(elems, text_arr, text) {
     }
     if (text.indexOf("and trash it.") != -1 ||
         text.indexOf("and trashes it.") != -1) {
+      //this case also handles trashing from swindlers
       getPlayer(text_arr[0]).gainCard(elems[0], -1);
       return true;
     }
