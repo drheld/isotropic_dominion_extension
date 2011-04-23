@@ -133,8 +133,8 @@ function Player(name) {
       if (this.special_counts["Uniques"] != undefined) {
         vineyard_points = Math.floor(this.special_counts["Uniques"] / 5);
       }
-      score_str = score_str + "+" + vineyards + "f@" + vineyard_points;
-      total_score = total_score + vineyards * vineyard_points;
+      score_str = score_str + "+" + fairgrounds + "f@" + fairgrounds_points;
+      total_score = total_score + fairgrounds * fairgrounds_points;
     }
 
     if (total_score != this.score) {
