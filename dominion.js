@@ -93,8 +93,8 @@ function Player(name) {
   this.deck_size = 10;
 
   // Map from special counts (such as number of gardens) to count.
-  this.special_counts = { "Treasure" : 7, "Victory" : 3, "Uniques" : 2 }
-  this.card_counts = { "Copper" : 7, "Estate" : 3 }
+  this.special_counts = { "Treasure" : 7, "Victory" : 3, "Uniques" : 2 };
+  this.card_counts = { "Copper" : 7, "Estate" : 3 };
 
   this.getScore = function() {
     var score_str = this.score;
@@ -141,7 +141,7 @@ function Player(name) {
       score_str = score_str + "=" + total_score;
     }
     return score_str;
-  }
+  };
 
   this.getDeckString = function() {
     var str = this.deck_size;
@@ -151,31 +151,35 @@ function Player(name) {
       str += "(";
 
       var special_types = [];
-      if (need_action_string) {
+      if (need_unique_string) {
         special_types.push(this.special_counts["Uniques"] + "u");
       }
       
       if (need_action_string) {
         special_types.push(this.special_counts["Actions"] + "a");
       }
-      
-      str += special_types.join(", ");
-      
+
+      if (special_types.length == 1) {
+        str += special_types[0];
+      } else {
+        str += special_types.join(", ");
+      }
+
       str += ")";
     }
     return str;
-  }
+  };
 
   this.changeScore = function(points) {
     this.score = this.score + parseInt(points);
-  }
+  };
 
   this.changeSpecialCount = function(name, delta) {
     if (this.special_counts[name] == undefined) {
       this.special_counts[name] = 0;
     }
     this.special_counts[name] = this.special_counts[name] + delta;
-  }
+  };
     
   this.recordUniqueCards = function(card, count) {
     //TODO: This breaks down with plurals, leverage Council Room's work:
@@ -183,21 +187,21 @@ function Player(name) {
     var name = card.innerHTML;
     
     if (this.card_counts[name] == undefined || this.card_counts[name] == 0) {
-      this.card_count[name] = count;
+      this.card_counts[name] = count;
       this.special_counts["Uniques"] += 1;
     } else {
-        this.card_count[name] += count;
+        this.card_counts[name] += count;
     }
     
-    if (this.card_count[name] <= 0) {
-      if (this.card_count[name] < 0) {
-        handleError("Card count for " + name + " is negative (" + this.card_count[name] + ")");
+    if (this.card_counts[name] <= 0) {
+      if (this.card_counts[name] < 0) {
+        handleError("Card count for " + name + " is negative (" + this.card_counts[name] + ")");
       }
-      delete this.card_count[name];
+      delete this.card_counts[name];
       this.special_counts["Uniques"] -= 1;
     }
         
-    }
+    };
 
   this.recordSpecialCards = function(card, count) {
     var name = card.innerHTML;
@@ -235,7 +239,7 @@ function Player(name) {
         handleError("Unknown card class: " + card.className + " for " + card.innerText);
       }
     }
-  }
+  };
 
   this.gainCard = function(card, count) {
     // You can't gain or trash cards while possessed.
@@ -246,7 +250,7 @@ function Player(name) {
     this.deck_size = this.deck_size + count;
     this.changeScore(pointsForCard(card.innerText) * count);
     this.recordSpecialCards(card, count);
-    this.recordUniqueCards(card, count)
+    this.recordUniqueCards(card, count);
   }
 }
 
