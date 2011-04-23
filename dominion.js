@@ -19,6 +19,7 @@ var i_introduced = false;
 var disabled = false;
 var had_error = false;
 var show_action_count = false;
+var show_unique_count = false;
 var possessed_turn = false;
 var turn_number = 0;
 var announced_error = false;
@@ -108,6 +109,7 @@ function Player(name) {
   this.name = name;
   this.score = 3;
   this.deck_size = 10;
+  this.card_counts = { 'Copper' : 7, 'Estate' : 3 };
 
   // Map from special counts (such as number of gardens) to count.
   // TODO(drheld): Should we just track all cards?
@@ -143,6 +145,15 @@ function Player(name) {
       score_str = score_str + "+" + vineyards + "v@" + vineyard_points;
       total_score = total_score + vineyards * vineyard_points;
     }
+    if (this.special_counts["Fairgrounds"] != undefined) {
+      var fairgrounds = this.special_counts["Fairgrounds"];
+      var fairground_points = 0;
+      var unique_cards = this.countUniqueCards();
+      fairground_points = 2 * Math.floor(unique_cards / 5);
+      score_str = score_str + "+" + fairgrounds + "f@" + fairground_points;
+      total_score = total_score + fairgrounds * fairground_points;
+    }
+
 
     if (total_score != this.score) {
       score_str = score_str + "=" + total_score;
@@ -150,10 +161,25 @@ function Player(name) {
     return score_str;
   }
 
+  this.countUniqueCards = function() {
+      var unique_cards = 0;
+      for (card in this.card_counts) {
+	unique_cards += 1;
+      }
+      return unique_cards;
+  }
+
   this.getDeckString = function() {
     var str = this.deck_size;
+    var specials = []
     if (show_action_count && this.special_counts["Actions"]) {
-      str += "(" + this.special_counts["Actions"] + "a)";
+      specials.push(this.special_counts["Actions"] + "a");
+    }
+    if (show_unique_count && this.special_counts["Fairgrounds"]) {
+      specials.push(this.countUniqueCards() + "u");
+    }
+    if (specials.length > 0) {
+        str += "(" + specials.join(",") + ")";
     }
     return str;
   }
@@ -183,6 +209,9 @@ function Player(name) {
     if (name.indexOf("Vineyard") == 0) {
       this.changeSpecialCount("Vineyard", count);
     }
+    if (name.indexOf("Fairgrounds") == 0) {
+      this.changeSpecialCount("Fairgrounds", count);
+    }
 
     var types = card.className.split("-").slice(1);
     for (type_i in types) {
@@ -200,7 +229,16 @@ function Player(name) {
         handleError("Unknown card class: " + card.className + " for " + card.innerText);
       }
     }
+    if (this.card_counts[name] != undefined) {
+      this.card_counts[name] += count;
+      if (this.card_counts[name] == 0) {
+	delete this.card_counts[name];
+      }
+    } else {
+      this.card_counts[name] = 1;
+    }
   }
+
 
   this.gainCard = function(card, count) {
     // You can't gain or trash cards while possessed.
@@ -542,6 +580,7 @@ function initialize(doc) {
   disabled = false;
   had_error = false;
   show_action_count = false;
+  show_unique_count = false;
   possessed_turn = false;
   turn_number = 0;
   announced_error = false;
@@ -720,6 +759,7 @@ function handle(doc) {
     elems = doc.getElementsByTagName("span");
     for (var elem in elems) {
       if (elems[elem].innerText == "Vineyard") show_action_count = true;
+      if (elems[elem].innerText == "Fairgrounds") show_unique_count = true;
     }
   }
 
