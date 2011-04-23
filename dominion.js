@@ -145,12 +145,25 @@ function Player(name) {
 
   this.getDeckString = function() {
     var str = this.deck_size;
-    if (show_action_count && this.special_counts["Actions"]) {
-      str += "(" + this.special_counts["Actions"] + "a)";
-    }
-    
-    if (show_unique_count && this.special_counts["Uniques"]) {
-      str += "(" + this.special_counts["Uniques"] + "u)";
+    var need_action_string = (show_action_count && this.special_counts["Actions"]);
+    var need_unique_string = (show_unique_count && this.special_counts["Uniques"]);
+    if  (need_action_string || need_unique_string) {
+      str += "(";
+
+      var special_types = [];
+      if need_action_string {
+        var unique_str = this.special_counts["Uniques"] + "u";
+        special_types += unique_str;
+      }
+      
+      if need_action_string {
+        var action_str = this.special_counts["Actions"] + "a";
+        special_types += action_str;
+      }
+      
+      str += special_types.join(", ");
+      
+      str += ")";
     }
     return str;
   }
@@ -165,32 +178,27 @@ function Player(name) {
     }
     this.special_counts[name] = this.special_counts[name] + delta;
   }
-  
-  this.isCard(name, cardName) {
-    if name.indexOf(cardName == 0) {
-        return true
-    }
     
-    return
-  }
-  
   this.recordUniqueCards = function(card, count) {
     //TODO: This breaks down with plurals, leverage Council Room's work:
     //https://github.com/rrenaud/dominionstats/blob/master/card_list.csv
-    var name = card.innerHTML
+    var name = card.innerHTML;
     
-    if (this.card_counts[name] == undefined || this.card_counts[name] == 0){
-        this.card_count[name] == count
-        this.special_counts["Uniques"] += 1
+    if (this.card_counts[name] == undefined || this.card_counts[name] == 0) {
+      this.card_count[name] == count;
+      this.special_counts["Uniques"] += 1;
+    } else {
+        this.card_count[name] += count;
     }
     
-    else {
-        this.card_count[name] += count
+    if (this.card_count[name] <= 0) {
+      if (this.card_count[name] < 0) {
+        handleError("Card count for " + name + " is negative (" + this.card_count[name] + ")");
+      }
+      delete this.card_count[name];
+      this.special_counts["Uniques"] -= 1;
     }
-    
-    if this.card_count[name] <= 0 {
-        delete this.card_count[name]
-        this.special_counts["Uniques"] -= 1
+        
     }
   }
   
