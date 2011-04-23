@@ -151,14 +151,12 @@ function Player(name) {
       str += "(";
 
       var special_types = [];
-      if need_action_string {
-        var unique_str = this.special_counts["Uniques"] + "u";
-        special_types += unique_str;
+      if (need_action_string) {
+        special_types.push(this.special_counts["Uniques"] + "u");
       }
       
-      if need_action_string {
-        var action_str = this.special_counts["Actions"] + "a";
-        special_types += action_str;
+      if (need_action_string) {
+        special_types.push(this.special_counts["Actions"] + "a");
       }
       
       str += special_types.join(", ");
@@ -185,7 +183,7 @@ function Player(name) {
     var name = card.innerHTML;
     
     if (this.card_counts[name] == undefined || this.card_counts[name] == 0) {
-      this.card_count[name] == count;
+      this.card_count[name] = count;
       this.special_counts["Uniques"] += 1;
     } else {
         this.card_count[name] += count;
@@ -200,8 +198,7 @@ function Player(name) {
     }
         
     }
-  }
-  
+
   this.recordSpecialCards = function(card, count) {
     var name = card.innerHTML;
     if (name.indexOf("Gardens") == 0) {
