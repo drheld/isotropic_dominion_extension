@@ -131,7 +131,7 @@ function Player(name) {
       var fairgrounds = this.special_counts["Fairgrounds"];
       var fairgrounds_points = 0;
       if (this.special_counts["Uniques"] != undefined) {
-        vineyard_points = Math.floor(this.special_counts["Uniques"] / 5);
+        fairgrounds_points = Math.floor(this.special_counts["Uniques"] / 5);
       }
       score_str = score_str + "+" + fairgrounds + "f@" + fairgrounds_points;
       total_score = total_score + fairgrounds * fairgrounds_points;
