@@ -289,7 +289,7 @@ function Player(name) {
       score_str = score_str + "=" + total_score;
     }
     return score_str;
-  };
+  }
 
   this.getDeckString = function() {
     var str = this.deck_size;
@@ -316,18 +316,18 @@ function Player(name) {
       str += ")";
     }
     return str;
-  };
+  }
 
   this.changeScore = function(points) {
     this.score = this.score + parseInt(points);
-  };
+  }
 
   this.changeSpecialCount = function(name, delta) {
     if (this.special_counts[name] == undefined) {
       this.special_counts[name] = 0;
     }
     this.special_counts[name] = this.special_counts[name] + delta;
-  };
+  }
     
   this.recordUniqueCards = function(name, count) {
     
@@ -346,7 +346,7 @@ function Player(name) {
       this.special_counts["Uniques"] -= 1;
     }
         
-    };
+  }
 
   this.recordSpecialCards = function(card, count) {
     var name = card.innerHTML;
@@ -384,7 +384,7 @@ function Player(name) {
         handleError("Unknown card class: " + card.className + " for " + card.innerText);
       }
     }
-  };
+  }
 
   this.gainCard = function(card, count) {
     // You can't gain or trash cards while possessed.
