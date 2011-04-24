@@ -30,6 +30,154 @@ var last_status_print = 0;
 var last_gain_player = null;
 var watch_tower_depth = -1;
 
+// Pluralization Support. Ugggggggggggh
+
+var plural_map = {"Adventurers" : "Adventurer",
+                  "Alchemists" : "Alchemist",
+                  "Ambassadors" : "Ambassador",
+                  "Apothecaries" : "Apothecary",
+                  "Apprentices" : "Apprentice",
+                  "Bag of Gold" : "Bag of Gold",
+                  "Banks" : "Bank",
+                  "Barons" : "Baron",
+                  "Bazaars" : "Bazaar",
+                  "Bishops" : "Bishop",
+                  "Black Markets" : "Black Market",
+                  "Bridges" : "Bridge",
+                  "Bureaucrats" : "Bureaucrat",
+                  "Caravans" : "Caravan",
+                  "Cellars" : "Cellar",
+                  "Chancellors" : "Chancellor",
+                  "Chapels" : "Chapel",
+                  "Cities" : "City",
+                  "Colonies" : "Colony",
+                  "Conspirators" : "Conspirator",
+                  "Contrabands" : "Contraband",
+                  "Coppers" : "Copper",
+                  "Coppersmiths" : "Coppersmith",
+                  "Council Rooms" : "Council Room",
+                  "Counting Houses" : "Counting House",
+                  "Courtyards" : "Courtyard",
+                  "Curses" : "Curse",
+                  "Cutpurses" : "Cutpurse",
+                  "Diadem" : "Diadem",
+                  "Duchies" : "Duchy",
+                  "Dukes" : "Duke",
+                  "Embargoes" : "Embargo",
+                  "Envoys" : "Envoy",
+                  "Estates" : "Estate",
+                  "Expands" : "Expand",
+                  "Explorers" : "Explorer",
+                  "Fairgrounds" : "Fairgrounds",
+                  "Familiars" : "Familiar",
+                  "Farming Villages" : "Farming Village",
+                  "Feasts" : "Feast",
+                  "Festivals" : "Festival",
+                  "Fishing Villages" : "Fishing Village",
+                  "Followers" : "Followers",
+                  "Forges" : "Forge",
+                  "Fortune Tellers" : "Fortune Teller",
+                  "Gardens" : "Gardens",
+                  "Ghost Ships" : "Ghost Ship",
+                  "Golds" : "Gold",
+                  "Golems" : "Golem",
+                  "Goons" : "Goons",
+                  "Grand Markets" : "Grand Market",
+                  "Great Halls" : "Great Hall",
+                  "Hamlets" : "Hamlet",
+                  "Harems" : "Harem",
+                  "Harvest" : "Harvest",
+                  "Havens" : "Haven",
+                  "Herbalists" : "Herbalist",
+                  "Hoards" : "Hoard",
+                  "Horns of Plenty" : "Horn of Plenty",
+                  "Horse Traders" : "Horse Traders",
+                  "Hunting Parties" : "Hunting Party",
+                  "Ironworks" : "Ironworks",
+                  "Islands" : "Island",
+                  "Jesters" : "Jester",
+                  "King's Courts" : "King's Court",
+                  "Laboratories" : "Laboratory",
+                  "Libraries" : "Library",
+                  "Lighthouses" : "Lighthouse",
+                  "Loans" : "Loan",
+                  "Lookouts" : "Lookout",
+                  "Markets" : "Market",
+                  "Masquerades" : "Masquerade",
+                  "Menagerie" : "Menagerie",
+                  "Merchant Ships" : "Merchant Ship",
+                  "Militias" : "Militia",
+                  "Mines" : "Mine",
+                  "Mining Villages" : "Mining Village",
+                  "Minions" : "Minion",
+                  "Mints" : "Mint",
+                  "Moats" : "Moat",
+                  "Moneylenders" : "Moneylender",
+                  "Monuments" : "Monument",
+                  "Mountebanks" : "Mountebank",
+                  "Native Villages" : "Native Village",
+                  "Navigators" : "Navigator",
+                  "Nobles" : "Nobles",
+                  "Outposts" : "Outpost",
+                  "Pawns" : "Pawn",
+                  "Pearl Divers" : "Pearl Diver",
+                  "Peddlers" : "Peddler",
+                  "Philosopher's Stones" : "Philosopher's Stone",
+                  "Pirate Ships" : "Pirate Ship",
+                  "Platinums" : "Platinum",
+                  "Possessions" : "Possession",
+                  "Potions" : "Potion",
+                  "Princess" : "Princess",
+                  "Provinces" : "Province",
+                  "Quarries" : "Quarry",
+                  "Rabbles" : "Rabble",
+                  "Remakes" : "Remake",
+                  "Remodels" : "Remodel",
+                  "Royal Seals" : "Royal Seal",
+                  "Saboteurs" : "Saboteur",
+                  "Salvagers" : "Salvager",
+                  "Scouts" : "Scout",
+                  "Scrying Pools" : "Scrying Pool",
+                  "Sea Hags" : "Sea Hag",
+                  "Secret Chambers" : "Secret Chamber",
+                  "Shanty Towns" : "Shanty Town",
+                  "Silvers" : "Silver",
+                  "Smithies" : "Smithy",
+                  "Smugglers" : "Smugglers",
+                  "Spies" : "Spy",
+                  "Stashes" : "Stash",
+                  "Stewards" : "Steward",
+                  "Swindlers" : "Swindler",
+                  "Tacticians" : "Tactician",
+                  "Talismans" : "Talisman",
+                  "Thieves" : "Thief",
+                  "Throne Rooms" : "Throne Room",
+                  "Torturers" : "Torturer",
+                  "Tournaments" : "Tournament",
+                  "Trade Routes" : "Trade Route",
+                  "Trading Posts" : "Trading Post",
+                  "Transmutes" : "Transmute",
+                  "Treasure Maps" : "Treasure Map",
+                  "Treasuries" : "Treasury",
+                  "Tributes" : "Tribute",
+                  "Trusty Steed" : "Trusty Steed",
+                  "Universities" : "University",
+                  "Upgrades" : "Upgrade",
+                  "Vaults" : "Vault",
+                  "Ventures" : "Venture",
+                  "Villages" : "Village",
+                  "Vineyards" : "Vineyard",
+                  "Warehouses" : "Warehouse",
+                  "Watchtowers" : "Watchtower",
+                  "Wharves" : "Wharf",
+                  "Wishing Wells" : "Wishing Well",
+                  "Witches" : "Witch",
+                  "Woodcutters" : "Woodcutter",
+                  "Worker's Villages" : "Worker's Village",
+                  "Workshops" : "Workshop",
+                  "Young Witches" : "Young Witch"};
+
+
 function debugString(thing) {
   return JSON.stringify(thing);
 }
@@ -181,10 +329,7 @@ function Player(name) {
     this.special_counts[name] = this.special_counts[name] + delta;
   };
     
-  this.recordUniqueCards = function(card, count) {
-    //TODO: This breaks down with plurals, leverage Council Room's work:
-    //https://github.com/rrenaud/dominionstats/blob/master/card_list.csv
-    var name = card.innerHTML;
+  this.recordUniqueCards = function(name, count) {
     
     if (this.card_counts[name] == undefined || this.card_counts[name] == 0) {
       this.card_counts[name] = count;
@@ -248,9 +393,21 @@ function Player(name) {
     last_gain_player = this;
     count = parseInt(count);
     this.deck_size = this.deck_size + count;
-    this.changeScore(pointsForCard(card.innerText) * count);
+
+    var singular_card_name = getSingularCardName(card.innerText);
+    this.changeScore(pointsForCard(singular_card_name) * count);
     this.recordSpecialCards(card, count);
-    this.recordUniqueCards(card, count);
+    this.recordUniqueCards(singular_card_name, count);
+  }
+}
+
+function getSingularCardName(name) {
+  if (plural_map[name] == undefined) {
+    //assume it's singular already
+    return name;
+  } else {
+    //return the singular value for the given pluralized card name
+    return plural_map[name]
   }
 }
 
