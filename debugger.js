@@ -3,17 +3,24 @@ $('#detailed_results').css('display', 'none');
 
 debug_mode = true;
 
+var last_turn_number = 0;
+var turn_jump = '';
+
 var game = $('#log')[0];
 var detailed_results = [];
 var debug_gain_messages = [];
 for (var i = 0; i < game.childNodes.length; ++i) {
   var node = game.childNodes[i];
-  var turn_change = node.innerText&& node.innerText.match(/—.*—/);
+  var turn_change = node.innerText && node.innerText.match(/—.*—/);
   handle(game.childNodes[i]);
   if (turn_change) {
     detailed_results.push(debug_gain_messages);
     debug_gain_messages = '';
     detailed_results.push(stateStrings());
+
+    var jump = turn_number - last_turn_number;
+    if (jump != 0 && jump != 1) turn_jump = turn_number;
+    last_turn_number = turn_number;
 
     // Show this turn's information.
     detailed_results.push('<br><i>' + game.childNodes[i].innerText + '</i><br>');
@@ -31,6 +38,12 @@ $('#detailed_results').append(detailed_results.join('') + '<br><br>');
 
 $('#results').append(stateStrings());
 console.log(players);
+
+if (turn_jump != "") {
+  $('#header').append("<div id='turn_jump'>Turns Jumped at turn " + turn_jump + "!</div>");
+  $('#turn_jump').css("color", "#900000");
+  $('#turn_jump').css("font-weight", "bold");
+}
 
 $('body').append('<button id="show_details">Show Details</button>');
 $('#show_details').click(function () {

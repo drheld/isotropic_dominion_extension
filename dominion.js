@@ -31,6 +31,8 @@ var last_player = null;
 var last_reveal_player = null;
 var last_reveal_card = null;
 
+var turn_number = 0;
+
 // Number for generating log line IDs.
 var next_log_line_num = 0;
 
@@ -331,6 +333,8 @@ function findTrailingPlayer(text) {
 function maybeHandleTurnChange(node) {
   var text = node.innerText;
   if (text.indexOf("—") != -1) {
+    var maybe_number = text.match(/([0-9]+) —/);
+    if (maybe_number) turn_number = maybe_number[1];
 
     // This must be a turn start.
     if (text.match(/— Your (?:extra )?turn/)) {
@@ -716,6 +720,7 @@ function initialize(doc) {
   had_error = false;
   possessed_turn = false;
   announced_error = false;
+  turn_number = 0;
   next_log_line_num = 0;
 
   last_gain_player = null;
