@@ -808,7 +808,7 @@ function maybeIntroducePlugin() {
     writeText("http://goo.gl/iDihS");
     writeText("Type !status to see the current score.");
     if (localStorage["allow_disable"] != "f") {
-      writeText("Type !disable to disable the point counter.");
+      writeText("Type !disable by turn 5 to disable the point counter.");
     }
   }
 }
@@ -834,7 +834,9 @@ function handleChatText(speaker, text) {
     if (i_introduced) wait_time = 100;
     setTimeout(command, wait_time);
   }
-  if (localStorage["allow_disable"] != "f" && text == " !disable") {
+  if (localStorage["allow_disable"] != "f" &&
+      text == " !disable" &&
+      turn_number <= 5) {
     localStorage.setItem("disabled", "t");
     disabled = true;
     deck_spot.innerHTML = "exit";
