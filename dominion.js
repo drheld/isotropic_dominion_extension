@@ -1091,12 +1091,6 @@ function handle(doc) {
   }
 
   try {
-    if (doc.constructor == HTMLDivElement &&
-        doc.innerText.indexOf("Say") == 0) {
-      if (doc.children[5].innerHTML) deck_spot = doc.children[5];
-      if (doc.children[6].innerHTML) points_spot = doc.children[6];
-    }
-
     if (doc.className && doc.className.indexOf("logline") >= 0) {
       if (logEntryForGame(doc)) {
         handleLogEntry(doc);
