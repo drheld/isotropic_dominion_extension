@@ -1074,9 +1074,7 @@ function restoreHistory(node) {
 }
 
 function inLobby() {
-  // In the lobby there is no real supply region -- it's empty.
-  var player_spot = document.getElementById("supply");
-  return (player_spot == undefined || player_spot.childElementCount == 0);
+  return $('#lobby').length != 0 && $('#lobby').css('display') != "none";
 }
 
 function handle(doc) {
