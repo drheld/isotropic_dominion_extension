@@ -13,6 +13,9 @@ var player_count = 0;
 var deck_spot;
 var points_spot;
 
+// Our copy of the log, which is visible
+var visible_log;
+
 var started = false;
 var introduced = false;
 var i_introduced = false;
@@ -32,9 +35,6 @@ var last_reveal_player = null;
 var last_reveal_card = null;
 
 var turn_number = 0;
-
-// Number for generating log line IDs.
-var next_log_line_num = 0;
 
 // Last time a status message was printed.
 var last_status_print = 0;
@@ -551,19 +551,7 @@ function maybeHandleGameStart(node) {
     return false;
   }
   initialize(node);
-  ensureLogNodeSetup(node);
   return true;
-}
-
-function nextLogId() {
-  return "logLine" + next_log_line_num++;
-}
-
-function ensureLogNodeSetup(node) {
-  if (!node.id) {
-    node.id = nextLogId();
-  }
-  node.addEventListener("DOMNodeRemovedFromDocument", reinsert);
 }
 
 function handleLogEntry(node) {
@@ -571,7 +559,7 @@ function handleLogEntry(node) {
 
   if (!started) return;
 
-  ensureLogNodeSetup(node);
+  visible_log.append($(node).clone());
   maybeRewriteName(node);
 
   if (maybeHandleTurnChange(node)) return;
@@ -721,7 +709,6 @@ function initialize(doc) {
   possessed_turn = false;
   announced_error = false;
   turn_number = 0;
-  next_log_line_num = 0;
 
   last_gain_player = null;
   scopes = [];
@@ -823,6 +810,12 @@ function maybeShowStatus(request_time) {
   }
 }
 
+function storeLog() {
+  if (!debug_mode) {
+    localStorage["log"] = visible_log.html();
+  }
+}
+
 function handleChatText(speaker, text) {
   if (!text) return;
   if (disabled) return;
@@ -841,10 +834,6 @@ function handleChatText(speaker, text) {
     disabled = true;
     deck_spot.innerHTML = "exit";
     points_spot.innerHTML = "faq";
-    $('div[reinserted="true"]').css('display', 'none');
-    if (!debug_mode) {
-      localStorage.setItem("log", $('#log').html());
-    }
     writeText(">> Point counter disabled.");
   }
 
@@ -875,6 +864,13 @@ function settingsString() {
   return JSON.stringify(settings);
 }
 
+function replaceRealLog() {
+  $('#log').show();
+  while (document.getElementById('visible_log')) {
+    $('#visible_log').remove();
+  }
+}
+
 function handleGameEnd(doc) {
   for (var node in doc.childNodes) {
     if (doc.childNodes[node].innerText == "game log") {
@@ -882,6 +878,7 @@ function handleGameEnd(doc) {
       started = false;
       if (deck_spot != undefined) deck_spot.innerHTML = "exit";
       if (points_spot != undefined) points_spot.innerHTML = "faq";
+      replaceRealLog();
 
       localStorage.removeItem("log");
 
@@ -917,55 +914,18 @@ function handleGameEnd(doc) {
           }
         }
       }
-
       // Post the game information to app-engine for later use for tests, etc.
       chrome.extension.sendRequest({
-          type: "log",
-          game_id: game_id_str,
-          reporter: name,
-          correct_score: has_correct_score,
-          state_strings: optional_state_strings,
-          log: document.body.innerHTML,
-          version: extension_version,
-          settings: settingsString() });
+        type: "log",
+        game_id: game_id_str,
+        reporter: name,
+        correct_score: has_correct_score,
+        state_strings: optional_state_strings,
+        log: document.body.innerHTML,
+        version: extension_version,
+        settings: settingsString() });
       break;
     }
-  }
-}
-
-/**
- * This event handler is called when a logline node is being removed. We
- * don't want log lines removed, so when this happens, we insert another
- * copy of the node into the parent to take its place. This copy will remain
- * behind after the original node is actually removed (which comes after the
- * event notification phase).
- */
-function reinsert(ev) {
-  if (!started) {
-    // The game isn't running so let the nodes go away.
-    return;
-  }
-
-  var node = ev.target;
-  var next = node.nextElementSibling;
-  var prev = node.previousElementSibling;
-  var duplicated = (next != undefined && next.id == node.id) ||
-                   (prev != undefined && prev.id == node.id);
-  if (!duplicated) {
-    var copy = node.cloneNode(true);
-    // The "fading" of old log messages reduces opacity to near zero; clear that
-    copy.removeAttribute("style");
-    copy.setAttribute("reinserted", "true");
-    if (disabled) {
-      copy.setAttribute("style", "display:none;");
-    }
-    try {
-      rewritingTree++;
-      node.parentNode.insertBefore(copy, node);
-    } finally {
-      rewritingTree--;
-    }
-    localStorage.setItem("log", $('#log').html());
   }
 }
 
@@ -975,16 +935,28 @@ function maybeStartOfGame(node) {
     return;
   }
 
-  if (localStorage.getItem("log") == undefined &&
-      nodeText.indexOf("Your turn 1 —") != -1) {
-    // We don't have a log but it's turn 1. This must be a solitaire game.
+  var maybeSolitaireStart = nodeText.indexOf("Your turn 1 —") != -1;
+  if (localStorage.getItem("log") == undefined && maybeSolitaireStart) {
+    // We don't have a log but it's your turn 1. This must be a solitaire game.
     // Create a fake (and invisible) setup line. We'll get called back again
     // with it.
     console.log("Single player game.");
     node = $('<div class="logline" style="display:none;">' +
-             'Turn order is you.</div>)').insertBefore(node)[0];
+        'Turn order is you.</div>)').insertBefore(node)[0];
     return;
   }
+
+  if (!maybeSolitaireStart && nodeText.indexOf("Turn order is") != 0) return;
+
+  visible_log = $('#visible_log');
+  if (visible_log.length == 0) {
+    visible_log = $('<pre id="visible_log"/>');
+  } else {
+    visible_log.children().remove();
+  }
+  var hiddenLog = $('#log');
+  hiddenLog.after(visible_log);
+  hiddenLog.hide();
 
   // The first line of actual text is either "Turn order" or something in
   // the middle of the game.
@@ -992,7 +964,6 @@ function maybeStartOfGame(node) {
     // The game is starting, so put in the initial blank entries and clear
     // out any local storage.
     console.log("--- starting game ---");
-    next_log_line_num = 0;
     localStorage.removeItem("log");
     localStorage.removeItem("disabled");
   } else {
@@ -1051,15 +1022,7 @@ function restoreHistory(node) {
         continue;
       }
 
-      // This might be the "faded" version with low opacity, so remove that.
-      var style = line.getAttribute("style");
-      if (style && style.indexOf("opacity") >= 0) {
-        line.removeAttribute("style");
-      }
-
       if (line.innerHTML == newLogEntryInner) {
-        var lastLineNum = line.id.match(/[0-9]+/);
-        next_log_line_num = parseInt(lastLineNum);
         break;
       } else {
         // move the node to the actual log region
@@ -1074,7 +1037,7 @@ function restoreHistory(node) {
 }
 
 function inLobby() {
-  return $('#lobby').length != 0 && $('#lobby').css('display') != "none";
+  return document.getElementById('player_table') != undefined;
 }
 
 function handle(doc) {
@@ -1088,12 +1051,16 @@ function handle(doc) {
     return;
   }
 
+  // We process log entries to the hidden log, copying them to the visible log.
+  // We don't then process those copies.
+  if (doc.parentNode.id == 'visible_log') return;
+
   try {
-    if (doc.className && doc.className.indexOf("logline") >= 0) {
+    if (doc.parentNode.id == 'log') {
       if (logEntryForGame(doc)) {
         handleLogEntry(doc);
-        if (started && !debug_mode) {
-          localStorage.setItem("log", doc.parentElement.innerHTML);
+        if (started) {
+          storeLog();
         }
       }
     }
