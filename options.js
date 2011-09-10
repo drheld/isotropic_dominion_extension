@@ -12,6 +12,21 @@ function loadOptions() {
   setupOption("t", "allow_disable");
   setupOption("f", "status_announce");
   setupOption("t", "always_display");
+
+  // Sanity check the options. There were bugs in enforcing this.
+  // If disabling is not allowed, require status announce.
+  if (localStorage["allow_disable"] == "f") {
+    if (localStorage["status_announce"] != "t") {
+      alert("Enabling post in status message.\n" +
+            "This setting was lost due to a bug.\n\n" +
+            "If you do not want to post in status message, " +
+            "please allow disabling and turn off this setting.");
+      localStorage["status_announce"] = "t";
+      $('#status_announce_t').attr('checked', true);
+    }
+    $('#status_announce_t').attr('disabled', true);
+    $('#status_announce_f').attr('disabled', true);
+  }
 }
 
 function generateOptionButton(name, value, desc) {
@@ -71,4 +86,5 @@ $('#allow_disable_f').click(function() {
   localStorage["status_announce"] = "t";
   $('#status_announce_t').attr('checked', true);
   $('#status_announce_t').attr('disabled', true);
+  $('#status_announce_f').attr('disabled', true);
 })
