@@ -322,6 +322,7 @@ function createFullLog() {
 
 function maybeAddToFullLog(node) {
   if (!restoring_log) {
+    $('#copied_temp_say').remove();
     $('#full_log').append($(node).clone());
   }
 }
@@ -1119,7 +1120,29 @@ function enterLobby() {
 }
 setTimeout("enterLobby()", 600);
 
+function maybeUpdateTempSay(ev) {
+  // Show the temp say dialogues if needed.
+  if (ev.relatedNode && ev.relatedNode.id == 'temp_say') {
+    var node = $(ev.relatedNode).clone();
+    node.attr('id', 'copied_temp_say');
+    node.css('color', '#36f');
+    node.css('font-style', 'italic');
+    node.css('margin-left', '50px');
+    $('#copied_temp_say').remove();
+    $('#full_log').append(node);
+    return;
+  }
+
+  // Copy the new html text. If it gets blanked out we don't get an event.
+  var temp_say = $('#temp_say');
+  if (temp_say.length > 0) {
+    console.log(temp_say.html());
+    $('#copied_temp_say').html(temp_say.html());
+  }
+}
+
 document.body.addEventListener('DOMNodeInserted', function(ev) {
+  maybeUpdateTempSay(ev);
   handle(ev.target);
 });
 
