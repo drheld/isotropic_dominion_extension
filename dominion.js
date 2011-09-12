@@ -1136,7 +1136,6 @@ function maybeUpdateTempSay(ev) {
   // Copy the new html text. If it gets blanked out we don't get an event.
   var temp_say = $('#temp_say');
   if (temp_say.length > 0) {
-    console.log(temp_say.html());
     $('#copied_temp_say').html(temp_say.html());
   }
 }
