@@ -6,7 +6,8 @@ debug_mode = true;
 var last_turn_number = 0;
 var turn_jump = '';
 
-var game = $('#log')[0];
+$('#log').attr('id', 'orginal_log');
+var game = $('#full_log').attr('id', 'log')[0];
 var detailed_results = [];
 var debug_gain_messages = [];
 for (var i = 0; i < game.childNodes.length; ++i) {
