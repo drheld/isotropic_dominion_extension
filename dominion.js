@@ -272,13 +272,14 @@ function Player(name) {
   }
 
   this.gainCard = function(card, count) {
+    // You can't gain or trash cards while possessed.
+    if (possessed_turn && this == last_player) return;
+
     if (debug_mode) {
       $('#log').children().eq(-1).before(
           '<div class="gain_debug">*** ' + name + " gains " +
           count + " " + card.innerText + "</div>");
     }
-    // You can't gain or trash cards while possessed.
-    if (possessed_turn && this == last_player) return;
 
     last_gain_player = this;
     count = parseInt(count);
@@ -897,7 +898,6 @@ function handleGameEnd(doc) {
 
       // Double check the scores so we can log if there was a bug.
       var has_correct_score = true;
-      var optional_state_strings = "";
       var win_log = document.getElementsByClassName("em");
       if (!announced_error && win_log && win_log.length == 1) {
         var summary = win_log[0].previousSibling.innerText;
@@ -915,7 +915,6 @@ function handleGameEnd(doc) {
             }
             if (has_correct_score && arr[1] != score) {
               has_correct_score = false;
-              optional_state_strings = stateStrings();
               break;
             }
           }
@@ -928,7 +927,7 @@ function handleGameEnd(doc) {
         game_id: game_id_str,
         reporter: name,
         correct_score: has_correct_score,
-        state_strings: optional_state_strings,
+        state_strings: stateStrings();,
         log: document.body.innerHTML,
         version: extension_version,
         settings: settingsString() });
