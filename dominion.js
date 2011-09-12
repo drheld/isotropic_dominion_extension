@@ -921,13 +921,15 @@ function handleGameEnd(doc) {
         }
       }
 
+      var printed_state_strings = stateStrings();
+
       // Post the game information to app-engine for later use for tests, etc.
       chrome.extension.sendRequest({
         type: "log",
         game_id: game_id_str,
         reporter: name,
         correct_score: has_correct_score,
-        state_strings: stateStrings();,
+        state_strings: printed_state_strings,
         log: document.body.innerHTML,
         version: extension_version,
         settings: settingsString() });
