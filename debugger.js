@@ -81,12 +81,14 @@ chrome.extension.sendRequest({ type: "fetch", url: url }, function(response) {
     if (player_name == "You") {
       player_name = rewriteName(reporter_name);
     }
-    var re = new RegExp("#[0-9]+ " + RegExp.quote(player_name) + ": ([0-9]+) points", "m");
+    var re = new RegExp("#[0-9]+ " + RegExp.quote(player_name) + ": (-?[0-9]+) points", "m");
     var arr = results.match(re);
     if (!arr || arr.length != 2 || arr[1] != score) {
-      var error = "Wrong score for " + player_name + " (calculated " + score + ", actual " + arr[1] + ")";
+      var error;
       if (!arr || arr.length != 2) {
         error = "Couldn't find score for " + player_name;
+      } else {
+        var error = "Wrong score for " + player_name + " (calculated " + score + ", actual " + arr[1] + ")";
       }
       error_found = true;
       $('#header').append("<div id='correct_now'>Error: " + error + ".</div>");
