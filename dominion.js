@@ -20,6 +20,7 @@ var disabled = false;
 var had_error = false;
 var show_action_count = false;
 var show_unique_count = false;
+var show_victory_count = false;
 var show_duchy_count = false;
 var possessed_turn = false;
 var announced_error = false;
@@ -38,6 +39,9 @@ var last_status_print = 0;
 
 // The last player who gained a card.
 var last_gain_player = null;
+
+// The last card gained
+var last_gained_card = null;
 
 // Track scoping of actions in play such as Watchtower.
 var scopes = [];
@@ -127,6 +131,8 @@ function pointsForCard(card_name) {
   if (card_name.indexOf("Harem") == 0) return 2;
   if (card_name.indexOf("Great Hall") == 0) return 1;
 
+  if (card_name.indexOf("Farmland") == 0) return 2;
+  if (card_name.indexOf("Tunnel") == 0) return 2;
   return 0;
 }
 
@@ -148,6 +154,16 @@ function Player(name) {
       var garden_points = Math.floor(this.deck_size / 10);
       score_str = score_str + "+" + gardens + "g@" + garden_points;
       total_score = total_score + gardens * garden_points;
+    }
+
+    if (this.special_counts["Silk Roads"] != undefined) {
+      var silk_roads = this.special_counts["Silk Roads"];
+      var silk_road_points = 0;
+      if (this.special_counts["Victory"] != undefined) {
+        silk_road_points = Math.floor(this.special_counts["Victory"] / 4);
+      }
+      score_str = score_str + "+" + silk_roads + "s@" + silk_road_points;
+      total_score = total_score + silk_roads * silk_road_points;
     }
 
     if (this.special_counts["Duke"] != undefined) {
@@ -190,8 +206,9 @@ function Player(name) {
     var str = this.deck_size;
     var need_action_string = (show_action_count && this.special_counts["Actions"]);
     var need_unique_string = (show_unique_count && this.special_counts["Uniques"]);
+    var need_victory_string = (show_victory_count && this.special_counts["Victory"]);
     var need_duchy_string = (show_duchy_count && this.special_counts["Duchy"]);
-    if (need_action_string || need_unique_string || need_duchy_string) {
+    if (need_action_string || need_unique_string || need_duchy_string || need_victory_string) {
       var special_types = [];
       if (need_unique_string) {
         special_types.push(this.special_counts["Uniques"] + "u");
@@ -201,6 +218,9 @@ function Player(name) {
       }
       if (need_duchy_string) {
         special_types.push(this.special_counts["Duchy"] + "d");
+      }
+      if (need_victory_string) {
+        special_types.push(this.special_counts["Victory"] + "v");
       }
       str += '(' + special_types.join(", ") + ')';
     }
@@ -252,6 +272,9 @@ function Player(name) {
     if (name.indexOf("Fairgrounds") == 0) {
       this.changeSpecialCount("Fairgrounds", count);
     }
+    if (name.indexOf("Silk Road") == 0) {
+      this.changeSpecialCount("Silk Roads", count);
+    }
 
     var types = card.className.split("-").slice(1);
     for (type_i in types) {
@@ -283,6 +306,9 @@ function Player(name) {
 
     last_gain_player = this;
     count = parseInt(count);
+    if (count > 0) {
+        last_gained_card = card;
+    }
     this.deck_size = this.deck_size + count;
 
     var singular_card_name = getSingularCardName(card.innerText);
@@ -629,6 +655,10 @@ function handleLogEntry(node) {
   // Mark down if a player reveals cards.
   if (text[1].indexOf("reveal") == 0) {
     last_reveal_player = getPlayer(text[0]);
+    if (text[3] == "Trader" && text[4] == "to") {
+        var player = getPlayer(text[0]);
+        player.gainCard(last_gained_card, -1);
+    }
   }
 
   // Expect one element from here on out.
@@ -1037,6 +1067,7 @@ function handle(doc) {
         if (elems[elem].innerText == "Vineyard") show_action_count = true;
         if (elems[elem].innerText == "Fairgrounds") show_unique_count = true;
         if (elems[elem].innerText == "Duke") show_duchy_count = true;
+        if (elems[elem].innerText == "Silk Road") show_victory_count = true;
       }
     }
 
