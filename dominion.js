@@ -306,9 +306,7 @@ function Player(name) {
 
     last_gain_player = this;
     count = parseInt(count);
-    if (count > 0) {
-        last_gained_card = card;
-    }
+    if (count > 0) last_gained_card = card;
     this.deck_size = this.deck_size + count;
 
     var singular_card_name = getSingularCardName(card.innerText);
@@ -656,8 +654,8 @@ function handleLogEntry(node) {
   if (text[1].indexOf("reveal") == 0) {
     last_reveal_player = getPlayer(text[0]);
     if (text[3] == "Trader" && text[4] == "to") {
-        var player = getPlayer(text[0]);
-        player.gainCard(last_gained_card, -1);
+      var player = getPlayer(text[0]);
+      player.gainCard(last_gained_card, -1);
     }
   }
 
