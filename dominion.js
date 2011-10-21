@@ -658,6 +658,7 @@ function handleLogEntry(node) {
     if (text[3] == "Trader" && text[4] == "to") {
         var player = getPlayer(text[0]);
         player.gainCard(last_gained_card, -1);
+        return;
     } else if (text[3] == "Tunnel") {
         var player = getPlayer(text[0]);
         player.gainCard(elems[1], 1);
