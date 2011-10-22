@@ -655,6 +655,16 @@ function handleLogEntry(node) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
   }
 
+ //mark down if a player reveals cards.
+  if (text[1].indexOf("reveal") == 0) {
+     last_reveal_player = getPlayer(text[0]);
+     if (text[3] == "Tunnel") {
+     var player = getPlayer(text[0]);
+     player.gainCard(elems[1], 1);
+     return;
+   }
+  }
+
   // Expect one element from here on out.
   if (elems.length > 1) return;
 
