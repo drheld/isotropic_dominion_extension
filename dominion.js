@@ -926,15 +926,15 @@ function handleGameEnd(doc) {
 
       // Double check the scores so we can log if there was a bug.
       var has_correct_score = true;
-      var win_log = document.getElementsByClassName("em");
-      if (!announced_error && win_log && win_log.length == 1) {
-        var summary = win_log[0].previousSibling.innerText;
+      var win_log = $('div.logline.em').prev()[0];
+      if (!announced_error && win_log) {
+        var summary = win_log.innerText;
         for (player in players) {
           var player_name = players[player].name;
           if (player_name == "You") {
             player_name = rewriteName(name);
           }
-          var re = new RegExp(RegExp.quote(player_name) + " has ([0-9]+) points");
+          var re = new RegExp(RegExp.quote(player_name) + " has (-?[0-9]+) points");
           var arr = summary.match(re);
           if (arr && arr.length == 2) {
             var score = ("" + players[player].getScore()).replace(/^.*=/, "");
