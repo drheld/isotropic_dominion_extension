@@ -40,9 +40,6 @@ var last_status_print = 0;
 // The last player who gained a card.
 var last_gain_player = null;
 
-// The last card gained
-var last_gained_card = null;
-
 // Track scoping of actions in play such as Watchtower.
 var scopes = [];
 
@@ -306,7 +303,6 @@ function Player(name) {
 
     last_gain_player = this;
     count = parseInt(count);
-    if (count > 0) last_gained_card = card;
     this.deck_size = this.deck_size + count;
 
     var singular_card_name = getSingularCardName(card.innerText);
@@ -551,6 +547,14 @@ function maybeHandleTournament(elems, text_arr, text) {
   return false;
 }
 
+function maybeHandleTrader(elems, text_arr, text) {
+  if (elems.length == 3 && text.match(/a Trader to gain a Silver/)) {
+    getPlayer(text_arr[0]).gainCard(elems[2], -1);
+    return true;
+  }
+  return false;
+}
+
 function maybeHandleVp(text) {
   var re = new RegExp("[+]([0-9]+) ▼");
   var arr = text.match(re);
@@ -632,6 +636,7 @@ function handleLogEntry(node) {
   if (maybeHandleSeaHag(elems, text, node.innerText)) return;
   if (maybeHandleOffensiveTrash(elems, text, node.innerText)) return;
   if (maybeHandleTournament(elems, text, node.innerText)) return;
+  if (maybeHandleTrader(elems, text, node.innerText)) return;
 
   if (text[0] == "trashing") {
     var player = last_player;
@@ -648,15 +653,6 @@ function handleLogEntry(node) {
   }
   if (text[1].indexOf("gain") == 0) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
-  }
-
-  // Mark down if a player reveals cards.
-  if (text[1].indexOf("reveal") == 0) {
-    last_reveal_player = getPlayer(text[0]);
-    if (text[3] == "Trader" && text[4] == "to") {
-      var player = getPlayer(text[0]);
-      player.gainCard(last_gained_card, -1);
-    }
   }
 
   // Expect one element from here on out.
