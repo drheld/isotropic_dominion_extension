@@ -706,6 +706,7 @@ function handleLogEntry(node) {
     }
     possessed_turn = possessed_turn_backup;
   } else if (action.indexOf("reveal") == 0) {
+    last_reveal_player = player;
     last_reveal_card = card;
   }
 }
