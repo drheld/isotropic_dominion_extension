@@ -564,7 +564,17 @@ function maybeHandleTrader(elems, text_arr, text) {
 function maybeHandleTunnel(elems, text_arr, text) {
   if (elems.length == 2 && text.match(/reveals? a Tunnel and gain/)) {
     getPlayer(text_arr[0]).gainCard(elems[1], 1);
+    return true;
   }
+  return false;
+}
+
+function maybeHandleNobleBrigand(elems, text_arr, text) {
+  if (text.match(/draw? and reveal?.+, trashing a/)) {
+    getPlayer(text_arr[0]).gainCard(elems[elems.length - 1], -1);
+    return true;
+  }
+  return false;
 }
 
 function maybeHandleVp(text) {
@@ -650,6 +660,7 @@ function handleLogEntry(node) {
   if (maybeHandleTournament(elems, text, node.innerText)) return;
   if (maybeHandleTrader(elems, text, node.innerText)) return;
   if (maybeHandleTunnel(elems, text, node.innerText)) return;
+  if (maybeHandleNobleBrigand(elems, text, node.innerText)) return;
 
   if (text[0] == "trashing") {
     var player = last_player;
