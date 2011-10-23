@@ -555,6 +555,12 @@ function maybeHandleTrader(elems, text_arr, text) {
   return false;
 }
 
+function maybeHandleTunnel(elems, text_arr, text) {
+  if (elems.length == 2 && text.match(/reveals? a Tunnel and gain/)) {
+    getPlayer(text_arr[0]).gainCard(elems[1], 1);
+  }
+}
+
 function maybeHandleVp(text) {
   var re = new RegExp("[+]([0-9]+) ▼");
   var arr = text.match(re);
@@ -637,6 +643,7 @@ function handleLogEntry(node) {
   if (maybeHandleOffensiveTrash(elems, text, node.innerText)) return;
   if (maybeHandleTournament(elems, text, node.innerText)) return;
   if (maybeHandleTrader(elems, text, node.innerText)) return;
+  if (maybeHandleTunnel(elems, text, node.innerText)) return;
 
   if (text[0] == "trashing") {
     var player = last_player;
@@ -653,16 +660,6 @@ function handleLogEntry(node) {
   }
   if (text[1].indexOf("gain") == 0) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
-  }
-
- //mark down if a player reveals cards.
-  if (text[1].indexOf("reveal") == 0) {
-     last_reveal_player = getPlayer(text[0]);
-     if (text[3] == "Tunnel") {
-     var player = getPlayer(text[0]);
-     player.gainCard(elems[1], 1);
-     return;
-   }
   }
 
   // Expect one element from here on out.
