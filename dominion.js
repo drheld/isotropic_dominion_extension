@@ -662,6 +662,15 @@ function handleLogEntry(node) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
   }
 
+  var player = getPlayer(text[0]);
+  var action = text[1];
+
+  // Handle revealing cards.
+  if (action.indexOf("reveal") == 0) {
+    last_reveal_player = player;
+    last_reveal_card = elems[elems.length - 1];
+  }
+
   // Expect one element from here on out.
   if (elems.length > 1) return;
 
@@ -669,9 +678,6 @@ function handleLogEntry(node) {
   var card = elems[0];
   var card_text = elems[0].innerText;
 
-  var player = getPlayer(text[0]);
-  var action = text[1];
-  var delta = 0;
   if (action.indexOf("buy") == 0) {
     var count = getCardCount(card_text, node.innerText);
     player.gainCard(card, count);
@@ -702,9 +708,6 @@ function handleLogEntry(node) {
       other_player.gainCard(card, -1);
     }
     possessed_turn = possessed_turn_backup;
-  } else if (action.indexOf("reveal") == 0) {
-    last_reveal_player = player;
-    last_reveal_card = card;
   }
 }
 
