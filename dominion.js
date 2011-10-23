@@ -53,6 +53,12 @@ RegExp.quote = function(str) {
   return str.replace(/([.?*+^$[\]\\(){}-])/g, "\\$1");
 };
 
+// Returns an html encoded version of a string.
+function htmlEncode(value){
+  return $('<div/>').text(value).html();
+}
+
+
 // Keep a map from plural to singular for cards that need it.
 var plural_map = {};
 for (var i = 0; i < card_list.length; ++i) {
@@ -802,7 +808,7 @@ function initialize(doc) {
     }
     var rewritten = rewriteName(arr[i]);
     if (rewritten != arr[i]) {
-      player_rewrites[arr[i]] = rewritten;
+      player_rewrites[htmlEncode(arr[i])] = htmlEncode(rewritten);
       arr[i] = rewritten;
     }
     // Initialize the player.
