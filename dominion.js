@@ -1091,7 +1091,7 @@ function handle(doc) {
     if (doc.innerText != undefined) {
       error += "On '" + doc.innerText + "': ";
     }
-    handleError("Javascript exception: " + debugString(err));
+    handleError("Javascript exception: " + err.stack);
   }
 }
 
