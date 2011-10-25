@@ -570,7 +570,7 @@ function maybeHandleTunnel(elems, text_arr, text) {
 }
 
 function maybeHandleNobleBrigand(elems, text_arr, text) {
-  if (text.match(/draw? and reveal?.+, trashing a/)) {
+  if (text.match(/draws? and reveals?.+, trashing a/)) {
     getPlayer(text_arr[0]).gainCard(elems[elems.length - 1], -1);
     return true;
   }
