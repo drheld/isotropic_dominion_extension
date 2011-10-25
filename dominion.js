@@ -566,6 +566,10 @@ function maybeHandleTunnel(elems, text_arr, text) {
     getPlayer(text_arr[0]).gainCard(elems[1], 1);
     return true;
   }
+  if (elems.length == 2 && text.match(/revealing a Tunnel and gaining/)) {
+    last_player.gainCard(elems[1], 1);
+    return true;
+  }
   return false;
 }
 
