@@ -861,6 +861,7 @@ function maybeIntroducePlugin() {
     writeText("★ Game scored by Dominion Point Counter ★");
     writeText("http://goo.gl/iDihS");
     writeText("Type !status to see the current score.");
+    writeText("Type !details to see deck details for each player.");
     if (localStorage["allow_disable"] != "f") {
       writeText("Type !disable by turn 5 to disable the point counter.");
     }
@@ -877,6 +878,24 @@ function maybeShowStatus(request_time) {
   }
 }
 
+function maybeShowDetails(request_time) {
+  if (last_status_print < request_time) {
+    last_status_print = new Date().getTime();
+
+    var my_name = localStorage["name"];
+    if (my_name == undefined || my_name == null) my_name = "Me";
+
+    for (var player in players) {
+      player = players[player];
+      var name = player.name == "You" ? my_name : player.name;
+      writeText('>> *' + name + '* => ' + player.getScore() +
+                ' points [deck size is ' + player.getDeckString() + '] - ' +
+                JSON.stringify(player.special_counts));
+      writeText('>>    ' + JSON.stringify(player.card_counts));
+    }
+  }
+}
+
 function storeLog() {
   if (!debug_mode) {
     localStorage["log"] = $('#full_log').html();
@@ -890,17 +909,22 @@ function hideExtension() {
   $('#full_log').hide();
 }
 
+function delayedRunCommand(command) {
+  var time = new Date().getTime();
+  var command = command + "(" + time + ")";
+  var wait_time = 200 * Math.floor(Math.random() * 10 + 1);
+  // If we introduced the extension, we get first dibs on answering.
+  if (i_introduced) wait_time = 100;
+  setTimeout(command, wait_time);
+}
+
 function handleChatText(speaker, text) {
   if (!text) return;
   if (disabled) return;
-  if (text == " !status") {
-    var time = new Date().getTime();
-    var command = "maybeShowStatus(" + time + ")";
-    var wait_time = 200 * Math.floor(Math.random() * 10 + 1);
-    // If we introduced the extension, we get first dibs on answering.
-    if (i_introduced) wait_time = 100;
-    setTimeout(command, wait_time);
-  }
+
+  if (text == " !status") delayedRunCommand("maybeShowStatus");
+  if (text == " !details") delayedRunCommand("maybeShowDetails");
+
   if (localStorage["allow_disable"] != "f" &&
       text == " !disable" &&
       turn_number <= 5) {
