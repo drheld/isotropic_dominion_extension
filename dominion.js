@@ -262,7 +262,11 @@ function Player(name) {
     // Hack! Hinterlands adds reactions that are not actions. Currently there
     // is no easy way to see this based on the class names. I've made a request
     // to change this but for now special case them. :(
-    if (singular_card_name == "Tunnel" || singular_card_name == "Fool's Gold") {
+    if (singular_card_name == "Tunnel") {
+      this.changeSpecialCount("Victory", count);
+      return;
+    }
+    if (singular_card_name == "Fool's Gold") {
       this.changeSpecialCount("Treasure", count);
       return;
     }
