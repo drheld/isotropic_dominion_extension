@@ -145,22 +145,22 @@ function Player(name) {
   this.deck_size = 10;
 
   // Map from special counts (such as number of gardens) to count.
-    this.special_counts = { "Treasure" : 7, "Victory" : 3, "Uniques" : 2 };
-    this.card_counts = { "Copper" : 7, "Estate" : 3 };
+  this.special_counts = { "Treasure" : 7, "Victory" : 3, "Uniques" : 2 };
+  this.card_counts = { "Copper" : 7, "Estate" : 3 };
 
   this.getScore = function() {
     var score_str = this.score;
     var total_score = this.score;
 
-    if (this.special_counts["Gardens"] != undefined) {
-      var gardens = this.special_counts["Gardens"];
+    if (this.card_counts["Gardens"] != undefined) {
+      var gardens = this.card_counts["Gardens"];
       var garden_points = Math.floor(this.deck_size / 10);
       score_str = score_str + "+" + gardens + "g@" + garden_points;
       total_score = total_score + gardens * garden_points;
     }
 
-    if (this.special_counts["Silk Roads"] != undefined) {
-      var silk_roads = this.special_counts["Silk Roads"];
+    if (this.card_counts["Silk Road"] != undefined) {
+      var silk_roads = this.card_counts["Silk Road"];
       var silk_road_points = 0;
       if (this.special_counts["Victory"] != undefined) {
         silk_road_points = Math.floor(this.special_counts["Victory"] / 4);
@@ -169,18 +169,18 @@ function Player(name) {
       total_score = total_score + silk_roads * silk_road_points;
     }
 
-    if (this.special_counts["Duke"] != undefined) {
-      var dukes = this.special_counts["Duke"];
+    if (this.card_counts["Duke"] != undefined) {
+      var dukes = this.card_counts["Duke"];
       var duke_points = 0;
-      if (this.special_counts["Duchy"] != undefined) {
-        duke_points = this.special_counts["Duchy"];
+      if (this.card_counts["Duchy"] != undefined) {
+        duke_points = this.card_counts["Duchy"];
       }
       score_str = score_str + "+" + dukes + "d@" + duke_points;
       total_score = total_score + dukes * duke_points;
     }
 
-    if (this.special_counts["Vineyard"] != undefined) {
-      var vineyards = this.special_counts["Vineyard"];
+    if (this.card_counts["Vineyard"] != undefined) {
+      var vineyards = this.card_counts["Vineyard"];
       var vineyard_points = 0;
       if (this.special_counts["Actions"] != undefined) {
         vineyard_points = Math.floor(this.special_counts["Actions"] / 3);
@@ -189,8 +189,8 @@ function Player(name) {
       total_score = total_score + vineyards * vineyard_points;
     }
 
-    if (this.special_counts["Fairgrounds"] != undefined) {
-      var fairgrounds = this.special_counts["Fairgrounds"];
+    if (this.card_counts["Fairgrounds"] != undefined) {
+      var fairgrounds = this.card_counts["Fairgrounds"];
       var fairgrounds_points = 0;
       if (this.special_counts["Uniques"] != undefined) {
         fairgrounds_points = Math.floor(this.special_counts["Uniques"] / 5) * 2;
@@ -210,7 +210,7 @@ function Player(name) {
     var need_action_string = (show_action_count && this.special_counts["Actions"]);
     var need_unique_string = (show_unique_count && this.special_counts["Uniques"]);
     var need_victory_string = (show_victory_count && this.special_counts["Victory"]);
-    var need_duchy_string = (show_duchy_count && this.special_counts["Duchy"]);
+    var need_duchy_string = (show_duchy_count && this.card_counts["Duchy"]);
     if (need_action_string || need_unique_string || need_duchy_string || need_victory_string) {
       var special_types = [];
       if (need_unique_string) {
@@ -220,7 +220,7 @@ function Player(name) {
         special_types.push(this.special_counts["Actions"] + "a");
       }
       if (need_duchy_string) {
-        special_types.push(this.special_counts["Duchy"] + "d");
+        special_types.push(this.card_counts["Duchy"] + "d");
       }
       if (need_victory_string) {
         special_types.push(this.special_counts["Victory"] + "v");
@@ -256,29 +256,9 @@ function Player(name) {
       delete this.card_counts[name];
       this.special_counts["Uniques"] -= 1;
     }
-    }
+  }
 
   this.recordSpecialCards = function(card, count) {
-    var name = card.innerHTML;
-    if (name.indexOf("Gardens") == 0) {
-      this.changeSpecialCount("Gardens", count);
-    }
-    if (name.indexOf("Duke") == 0) {
-      this.changeSpecialCount("Duke", count);
-    }
-    if (name.indexOf("Duchy") == 0 || name.indexOf("Duchies") == 0) {
-      this.changeSpecialCount("Duchy", count);
-    }
-    if (name.indexOf("Vineyard") == 0) {
-      this.changeSpecialCount("Vineyard", count);
-    }
-    if (name.indexOf("Fairgrounds") == 0) {
-      this.changeSpecialCount("Fairgrounds", count);
-    }
-    if (name.indexOf("Silk Road") == 0) {
-      this.changeSpecialCount("Silk Roads", count);
-    }
-
     var types = card.className.split("-").slice(1);
     for (type_i in types) {
       var type = types[type_i];
