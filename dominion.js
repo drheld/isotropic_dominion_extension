@@ -258,7 +258,15 @@ function Player(name) {
     }
   }
 
-  this.recordSpecialCards = function(card, count) {
+  this.recordSpecialCounts = function(singular_card_name, card, count) {
+    // Hack! Hinterlands adds reactions that are not actions. Currently there
+    // is no easy way to see this based on the class names. I've made a request
+    // to change this but for now special case them. :(
+    if (singular_card_name == "Tunnel" || singular_card_name == "Fool's Gold") {
+      this.changeSpecialCount("Treasure", count);
+      return;
+    }
+
     var types = card.className.split("-").slice(1);
     for (type_i in types) {
       var type = types[type_i];
@@ -293,7 +301,7 @@ function Player(name) {
 
     var singular_card_name = getSingularCardName(card.innerText);
     this.changeScore(pointsForCard(singular_card_name) * count);
-    this.recordSpecialCards(card, count);
+    this.recordSpecialCounts(singular_card_name, card, count);
     this.recordCards(singular_card_name, count);
   }
 }
