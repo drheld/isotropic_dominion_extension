@@ -10,6 +10,7 @@ function setupOption(default_value, name) {
 
 function loadOptions() {
   setupOption("t", "allow_disable");
+  setupOption("t", "allow_details");
   setupOption("f", "status_announce");
   setupOption("t", "always_display");
 
@@ -63,6 +64,11 @@ element.innerHTML =
                  "allow_disable",
                  "Allow disabling.",
                  "Do not allow disabling.") +
+  generateOption("Allow any player to display deck card counts with !details?",
+                 "",
+                 "allow_details",
+                 "Allow details.",
+                 "Do not allow details.") +
   generateOption("Change lobby status to announce you use point counter?",
                  "Mandatory if disabling is not allowed.",
                  "status_announce",

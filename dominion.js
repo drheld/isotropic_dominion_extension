@@ -853,7 +853,9 @@ function maybeIntroducePlugin() {
     writeText("★ Game scored by Dominion Point Counter ★");
     writeText("http://goo.gl/iDihS");
     writeText("Type !status to see the current score.");
+    if (localStorage["allow_details"] != "f"){	
     writeText("Type !details to see deck details for each player.");
+    }
     if (localStorage["allow_disable"] != "f") {
       writeText("Type !disable by turn 5 to disable the point counter.");
     }
@@ -915,8 +917,7 @@ function handleChatText(speaker, text) {
   if (disabled) return;
 
   if (text == " !status") delayedRunCommand("maybeShowStatus");
-  if (text == " !details") delayedRunCommand("maybeShowDetails");
-
+  if (localStorage["allow_details"] != "f" && text == " !details") delayedRunCommand("maybeShowDetails");
   if (localStorage["allow_disable"] != "f" &&
       text == " !disable" &&
       turn_number <= 5) {
