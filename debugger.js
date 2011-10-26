@@ -6,7 +6,7 @@ debug_mode = true;
 var last_turn_number = 0;
 var turn_jump = '';
 
-$('#log').attr('id', 'orginal_log');
+$('#log').remove();
 var game = $('#full_log').attr('id', 'log')[0];
 var detailed_results = [];
 var debug_gain_messages = [];
