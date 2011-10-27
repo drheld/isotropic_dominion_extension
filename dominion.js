@@ -1104,6 +1104,7 @@ function handle(doc) {
       show_action_count = false;
       show_unique_count = false;
       show_duchy_count = false;
+      show_victory_count = false;
       elems = doc.getElementsByTagName("span");
       for (var elem in elems) {
         if (elems[elem].innerText == "Vineyard") show_action_count = true;
