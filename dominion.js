@@ -781,7 +781,7 @@ function initialize(doc) {
     disabled = true;
   }
 
-  if (!disabled && localStorage["always_display"] != "f") {
+  if (!disabled && getOption("always_display")) {
     updateScores();
     updateDeck();
   }
@@ -854,7 +854,7 @@ function maybeIntroducePlugin() {
     writeText("http://goo.gl/iDihS");
     writeText("Type !status to see the current score.");
     writeText("Type !details to see deck details for each player.");
-    if (localStorage["allow_disable"] != "f") {
+    if (getOption("allow_disable")) {
       writeText("Type !disable by turn 5 to disable the point counter.");
     }
   }
@@ -917,9 +917,7 @@ function handleChatText(speaker, text) {
   if (text == " !status") delayedRunCommand("maybeShowStatus");
   if (text == " !details") delayedRunCommand("maybeShowDetails");
 
-  if (localStorage["allow_disable"] != "f" &&
-      text == " !disable" &&
-      turn_number <= 5) {
+  if (getOption("allow_disable") && text == " !disable" && turn_number <= 5) {
     localStorage.setItem("disabled", "t");
     disabled = true;
     hideExtension();
@@ -1126,7 +1124,7 @@ function handle(doc) {
                      doc.childNodes[2].nodeValue);
     }
 
-    if (localStorage["always_display"] != "f") {
+    if (getOption("always_display") {
       if (!disabled) {
         updateScores();
         updateDeck();
@@ -1159,7 +1157,7 @@ function buildStatusMessage() {
 }
 
 function enterLobby() {
-  if (localStorage["status_announce"] == "t" &&
+  if (getOption("status_announce") &&
       $('#lobby').length != 0 && $('#lobby').css('display') != "none") {
     // Set the original status message.
     writeText(buildStatusMessage());

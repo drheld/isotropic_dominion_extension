@@ -1,6 +1,5 @@
 // Set the initial status message to the recorded one if we're handling status.
-if (localStorage["status_announce"] == "t" &&
-    localStorage["status_msg"] != undefined) {
+if (getOption("status_announce") && localStorage["status_msg"] != undefined) {
   document.getElementsByName("status")[0].value = localStorage["status_msg"];
 }
 

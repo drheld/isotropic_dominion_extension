@@ -1,0 +1,17 @@
+/*
+ * Styles for the options page.
+ */
+#optionPanel {
+  background-color: #dbf8db;
+  padding: 0.5em;
+  width: 100%;
+}
+#optionPanel {
+  display: block;
+}
+#optionPanel .optionNote {
+  font-style: italic;
+}
+#optionPanel > label {
+    display: block;
+}
