@@ -85,4 +85,7 @@ function buildOptionsSection() {
 
 $(document).ready(function() {
   $(document.body).append(buildOptionsSection());
+
+  localStorage.removeItem("log");
+  localStorage.removeItem("disabled");
 });

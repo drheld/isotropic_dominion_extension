@@ -15,3 +15,26 @@
 #optionPanel > label {
     display: block;
 }
+
+
+/*
+ * Styles for showing player card data.
+ */
+.player1, .player1 * {
+  background: #dbf8db;
+}
+.player2, .player2 * {
+  background: #fdfed3;
+}
+.player3, .player3 * {
+  background: #feefd3;
+}
+.player4, .player4 * {
+  background: #e7fefe;
+}
+.player5, .player5 * {
+  background: #fee5fe;
+}
+.player6, .player6 * {
+  background: #fad4d4;
+}

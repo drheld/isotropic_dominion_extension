@@ -378,6 +378,8 @@ function maybeHandleTurnChange(node) {
 
     if (last_player == null) {
       console.log("Failed to get player from: " + node.innerText);
+    } else {
+      $('#full_log :last').addClass("player" + last_player.index);
     }
 
     possessed_turn = text.match(/\(possessed by .+\)/);
@@ -820,6 +822,7 @@ function initialize(doc) {
     }
     // Initialize the player.
     players[arr[i]] = new Player(arr[i]);
+    players[arr[i]].index = player_count;
 
     if (arr[i] != "You") {
       other_player_names.push(RegExp.quote(arr[i]));
@@ -946,6 +949,7 @@ function settingsString() {
   addSetting("always_display", settings);
   addSetting("allow_disable", settings);
   addSetting("name", settings);
+  addSetting("show_card_counts", settings);
   addSetting("status_announce", settings);
   addSetting("status_msg", settings);
   return JSON.stringify(settings);
@@ -1067,9 +1071,9 @@ function restoreHistory(node) {
 
   // First build a DOM tree of the old log messages in a copy of the log.
   var log_entries = $('<pre id="temp"></pre>').html(logHistory).children();
-  for (log in log_entries) {
-    var entry = $(log_entries[log]);
-    if (entry.html() == node.innerHTML) break;
+  for (var i = 0; i < log_entries.length; ++i) {
+    var entry = $(log_entries[i]);
+    if (entry.text() == node.innerText) break;
     $('#full_log').append(entry.clone());
     handleLogEntry(entry[0]);
   }
@@ -1124,7 +1128,7 @@ function handle(doc) {
                      doc.childNodes[2].nodeValue);
     }
 
-    if (getOption("always_display") {
+    if (getOption("always_display")) {
       if (!disabled) {
         updateScores();
         updateDeck();
