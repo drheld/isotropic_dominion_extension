@@ -307,6 +307,12 @@ function Player(name) {
     this.changeScore(pointsForCard(singular_card_name) * count);
     this.recordSpecialCounts(singular_card_name, card, count);
     this.recordCards(singular_card_name, count);
+
+    // FIXME(drheld): Handle graphical mode.
+    if (!setupPerPlayerTextCardCounts()) {
+      var id = '#' + cardId(this.id, singular_card_name);
+      $(id).text(this.card_counts[singular_card_name]);
+    }
   }
 }
 
@@ -379,7 +385,7 @@ function maybeHandleTurnChange(node) {
     if (last_player == null) {
       console.log("Failed to get player from: " + node.innerText);
     } else {
-      $('#full_log :last').addClass("player" + last_player.index);
+      $('#full_log :last').addClass(last_player.id);
     }
 
     possessed_turn = text.match(/\(possessed by .+\)/);
@@ -822,7 +828,7 @@ function initialize(doc) {
     }
     // Initialize the player.
     players[arr[i]] = new Player(arr[i]);
-    players[arr[i]].index = player_count;
+    players[arr[i]].id = "player" + player_count;
 
     if (arr[i] != "You") {
       other_player_names.push(RegExp.quote(arr[i]));
@@ -841,6 +847,9 @@ function initialize(doc) {
         "(index is: " + self_index + ").");
     setTimeout("maybeIntroducePlugin()", wait_time);
   }
+
+  // FIXME(drheld): Handle graphical mode.
+  setupPerPlayerTextCardCounts();
 }
 
 function maybeRewriteName(doc) {

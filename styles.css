@@ -38,3 +38,15 @@
 .player6, .player6 * {
   background: #fad4d4;
 }
+
+.playerCardCountCol {
+  padding: 0 0.25em;
+  text-align: right;
+}
+
+.avail {
+  padding-right: 1ex !important;
+}
+.availPadding {
+  padding-right: 3ex;
+}
