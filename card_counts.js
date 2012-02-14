@@ -3,6 +3,35 @@ function cardId(player_id, card_name) {
   return player_id + "_" + card_name.replace(/[^a-zA-Z]/gi, "").toLowerCase();
 }
 
+// Sets up the per player card count layout.
+// Returns true if this call set it up, or false if it was already setup.
+function setupPerPlayerCardCounts() {
+  if (!getOption("show_card_counts")) {
+    return true;
+  }
+
+  // Make sure things aren't already setup.
+  if ($('#player1_copper').length != 0) return false;
+
+  if ($('#chat ~ a[href^="/mode/"]').text() == "images") {
+    setupPerPlayerTextCardCounts();
+  } else {
+    setupPerPlayerImageCardCounts('kingdom');
+    setupPerPlayerImageCardCounts('basic');
+  }
+  return true;
+}
+
+// Creates an appropriately IDd table cell for a card/player.
+function createPlayerCardCountCell(player, card) {
+  var id = cardId(player.id, card);
+  var count = player.card_counts[card];
+  if (count == undefined) count = '-';
+  var cell = $('<td id="' + id + '">' + count + '</td>');
+  cell.addClass("playerCardCountCol").addClass(player.id);
+  return cell;
+}
+
 
 //
 // TEXT MODE
@@ -26,9 +55,6 @@ function growHeaderColumns() {
 
 // Set up the card count cells for all players in text mode.
 function setupPerPlayerTextCardCounts() {
-  // Make sure things aren't already setup.
-  if ($('#player1_copper').length != 0) return false;
-
   // For each row in the supply table, add a column count cell for each player.
   $(".txcardname").each(function() {
     var $this = $(this);
@@ -37,17 +63,33 @@ function setupPerPlayerTextCardCounts() {
     // Insert new cells after this one.
     var insertAfter = $this.next();
     for (var p in players) {
-      var player = players[p];
-      var id = cardId(player.id, cardName);
-      var count = player.card_counts[cardName];
-      if (count == undefined) count = '-';
-      var cell = $('<td id="' + id + '">' + count + '</td>');
-      cell.addClass("playerCardCountCol").addClass(player.id);
+      var cell = createPlayerCardCountCell(players[p], cardName);
       insertAfter.after(cell);
       insertAfter = cell;
     }
     insertAfter.after($('<td class="availPadding"></td>'));
   });
   growHeaderColumns();
-  return true;
+}
+
+
+//
+// GRAPHIC MODE
+//
+
+// Set up the per-player card counts in image mode for a given column.
+function setupPerPlayerImageCardCounts(region) {
+  var selector = '.' + region + '-column';
+
+  // make "hr" rows span all columns
+  var numPlayers = 1 + player_count;
+  $(selector + ' .hr:empty').append('<td colspan="' + numPlayers + '"></td>');
+
+  $(selector + ' .supplycard').each(function() {
+    var $this = $(this);
+    var cardName = $this.attr('cardname');
+    for (var p in players) {
+      $this.append(createPlayerCardCountCell(players[p], cardName));
+    }
+  });
 }

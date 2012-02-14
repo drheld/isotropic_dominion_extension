@@ -13,7 +13,7 @@
   font-style: italic;
 }
 #optionPanel > label {
-    display: block;
+  display: block;
 }
 
 
@@ -45,8 +45,96 @@
 }
 
 .avail {
-  padding-right: 1ex !important;
+  padding-right: 0.5ex !important;
 }
 .availPadding {
   padding-right: 3ex;
 }
+
+
+/*
+ * Styles for showing card counts in image mode.
+ */
+
+td.kingdom-column, td.basic-column {
+  width: auto !important;
+}
+
+.kingdom-column > *, .basic-column > * {
+  display: table-row;
+}
+
+.kingdom-column > * > *, .basic-column > * > * {
+  display: table-cell;
+}
+
+/* Cause the prices + count display for basic cards to be vertical just like for kingdom cards */
+.imbasic > .imprice {
+  display: inline-block;
+}
+
+.imbasic {
+  width: 10px !important;
+}
+.imverticle {
+  width: 10px !important;
+}
+
+.imageMode #game, .imageMode {
+  display: table-row !important;
+}
+
+.imageMode #optionPanel {
+  display: table-cell;
+  width: 100%;
+}
+
+.imageMode #supply {
+  position: static !important;
+  display: table-cell !important;
+  width: auto !important;
+  left: inherit !important;
+  bottom: inherit !important;
+  vertical-align: bottom;
+}
+
+.imageMode #supply > table {
+  bottom: inherit !important;
+  position: static !important;
+}
+
+.imageMode #playerData {
+  border-bottom: black 1px groove;
+}
+
+.playing #right {
+  padding-left: 1em;
+  margin-left: auto !important;
+  vertical-align: bottom;
+  width: 100%;
+  display: table-cell;
+}
+
+.playing #full_log {
+  height: auto !important;
+  overflow-y: auto;
+  margin-left: 2em;
+}
+
+.playing #full_log > .logline > div[style] {
+  height: 0 !important;
+}
+
+
+
+#game .right {
+  margin-left: 400px !important;
+}
+#game .supply {
+  width: 400px !important
+}
+div.vertical {
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+

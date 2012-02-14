@@ -308,10 +308,11 @@ function Player(name) {
     this.recordSpecialCounts(singular_card_name, card, count);
     this.recordCards(singular_card_name, count);
 
-    // FIXME(drheld): Handle graphical mode.
-    if (!setupPerPlayerTextCardCounts()) {
-      var id = '#' + cardId(this.id, singular_card_name);
-      $(id).text(this.card_counts[singular_card_name]);
+    if (getOption('show_card_counts')) {
+      if (!setupPerPlayerCardCounts()) {
+        var id = '#' + cardId(this.id, singular_card_name);
+        $(id).text(this.card_counts[singular_card_name]);
+      }
     }
   }
 }
@@ -848,8 +849,11 @@ function initialize(doc) {
     setTimeout("maybeIntroducePlugin()", wait_time);
   }
 
-  // FIXME(drheld): Handle graphical mode.
-  setupPerPlayerTextCardCounts();
+  if (getOption('show_card_counts')) {
+    setupPerPlayerCardCounts();
+  }
+
+  $('#full_log').append('<div style="height: 60em"></div>');
 }
 
 function maybeRewriteName(doc) {
