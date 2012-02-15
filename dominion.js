@@ -993,6 +993,9 @@ function handleGameEnd(doc) {
         }
       }
 
+      // Don't bother logging correct score games.
+      if (has_correct_score) return;
+
       var printed_state_strings = stateStrings();
 
       // Post the game information to app-engine for later use for tests, etc.
