@@ -18,6 +18,14 @@ function setupPerPlayerCardCounts() {
   } else {
     setupPerPlayerImageCardCounts('kingdom');
     setupPerPlayerImageCardCounts('basic');
+
+    // Setup the counts again whenever the table is recreated.
+    $("#supply").bind("DOMNodeInserted", function(e) {
+      if (e.target.constructor == HTMLTableElement) {
+        setupPerPlayerImageCardCounts('kingdom');
+        setupPerPlayerImageCardCounts('basic');
+      }
+    });
   }
   return true;
 }
