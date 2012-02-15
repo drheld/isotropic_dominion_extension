@@ -1062,6 +1062,10 @@ function maybeStartOfGame(node) {
 // Returns true if the log node should be handled as part of the game.
 function logEntryForGame(node) {
   if (inLobby()) {
+    // Remove the log if we have one as we're not in a game.
+    if (localStorage.getItem("log") != undefined) {
+      localStorage.removeItem("log");
+    }
     return false;
   }
 
