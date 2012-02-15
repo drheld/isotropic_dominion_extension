@@ -22,8 +22,10 @@ function setupPerPlayerCardCounts() {
     // Setup the counts again whenever the table is recreated.
     $("#supply").bind("DOMNodeInserted", function(e) {
       if (e.target.constructor == HTMLTableElement) {
-        setupPerPlayerImageCardCounts('kingdom');
-        setupPerPlayerImageCardCounts('basic');
+        if ($('#player1_copper').length == 0) {
+          setupPerPlayerImageCardCounts('kingdom');
+          setupPerPlayerImageCardCounts('basic');
+        }
       }
     });
   }
