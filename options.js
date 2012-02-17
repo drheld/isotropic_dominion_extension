@@ -1,90 +1,91 @@
-function setupOption(default_value, name) {
-  var enable = localStorage[name];
-  if (enable == undefined) {
-    enable = default_value;
+var optionButtons = {
+  allow_disable: {text: "Allow opponents to disable point counter with !disable."},
+  status_announce: {text: "Change lobby status to announce you use point counter.",
+                    extra: "Mandatory if disabling is not allowed."},
+  always_display: {text: "Replace exit/faq with scores and card counts."},
+  show_card_counts: {text: "Show every player's card counts for each card."},
+};
+
+
+function setOption(name, value) {
+  localStorage[name] = value;
+  $('#' + name).attr('checked', value);
+}
+
+function initializeOption(name, default_value) {
+  var value = localStorage[name];
+
+  // If it's not set, set it to the default.
+  if (value == undefined) localStorage[name] = default_value;
+
+  // Move forward deprecated options.
+  if (value == 't') localStorage[name] = 'true';
+  if (value == 'f') localStorage[name] = 'false';
+}
+
+function initializeOptions() {
+  initializeOption('allow_disable', true);
+  initializeOption('status_announce', false);
+  initializeOption('always_display', true);
+  initializeOption('show_card_counts', true);
+
+  // Sanity check the options.
+  if (!getOption('allow_disable') && !getOption('status_announce')) {
+    alert('Allowing disabling.\n' +
+          'If you do not want to allow disabling, please enable lobby status ' +
+          'and turn off this setting.');
+    setOption('status_announce', 'true');
+  }
+}
+
+function onButtonChange(evt) {
+  var button = $(evt.target);
+  setOption(button.attr('id'), button.attr('checked'));
+}
+
+function createOptionButton(name, section, option) {
+  var option_desc = option.text;
+  if (option.extra) {
+    option_desc += ' <span class="optionNote">(' + option.extra + ')</span>';
   }
 
-  var name_to_select = document.getElementById(name + "_" + enable);
-  name_to_select.checked = true
+  var control = $('<label/>').attr('for', name);
+  var button = $('<input type="checkbox"/>').attr('id', name).attr('name', name);
+
+  button.change(onButtonChange);
+  control.append(button).append(option_desc);
+  button.attr('checked', getOption(name));
+  option.node = button;
+  section.append(control);
 }
 
-function loadOptions() {
-  setupOption("t", "allow_disable");
-  setupOption("f", "status_announce");
-  setupOption("t", "always_display");
+function onDisableButtonChange() {
+  var allow_disable = getOption('allow_disable');
+  optionButtons['status_announce'].node.attr('disabled', allow_disable == false);
+  if (!allow_disable) setOption('status_announce', true);
+}
 
-  // Sanity check the options. There were bugs in enforcing this.
-  // If disabling is not allowed, require status announce.
-  if (localStorage["allow_disable"] == "f") {
-    if (localStorage["status_announce"] != "t") {
-      alert("Enabling post in status message.\n" +
-            "This setting was lost due to a bug.\n\n" +
-            "If you do not want to post in status message, " +
-            "please allow disabling and turn off this setting.");
-      localStorage["status_announce"] = "t";
-      $('#status_announce_t').attr('checked', true);
-    }
-    $('#status_announce_t').attr('disabled', true);
-    $('#status_announce_f').attr('disabled', true);
+function buildOptionsSection() {
+  initializeOptions();
+
+  var section = $('<div/>').attr('id', 'optionPanel');
+  section.append('<h3>Dominion Point Counter Options</h3>');
+
+  for (var opt in optionButtons) {
+    createOptionButton(opt, section, optionButtons[opt]);
   }
+
+  // Make sure people are either disableable or show status message.
+  var disable_button = optionButtons['allow_disable'].node;
+  disable_button.change(function() { onDisableButtonChange(); });
+  onDisableButtonChange();
+
+  return section;
 }
 
-function generateOptionButton(name, value, desc) {
-  var id = name + "_" + value;
-  return "<label for='" + id + "'>" +
-    "<input type='radio' name='" + name + "' id='" + id + "'" +
-        "onclick='saveOption(\"" + name + "\", \"" + value + "\")'>" +
-      desc +
-    "</label><br>";
-}
+$(document).ready(function() {
+  $(document.body).append(buildOptionsSection());
 
-function generateOption(option_desc, extra_desc, name, yes_desc, no_desc) {
-  if (extra_desc != "") {
-    extra_desc += '<div style="line-height:6px;">&nbsp;</div>';
-  }
-  return "<h3>" + option_desc + "</h3>" + extra_desc +
-         generateOptionButton(name, "t", yes_desc) +
-         generateOptionButton(name, "f", no_desc);
-}
-
-var js_element = document.createElement("script");
-js_element.id = "pointCounterOptionsJavascript";
-js_element.type = "text/javascript";
-js_element.innerHTML = "function saveOption(name, value) { localStorage[name] = value; }"
-document.body.appendChild(js_element);
-
-var element = document.createElement("div");
-element.id = "pointCounterOptions";
-
-element.innerHTML =
-  "<h1>Dominion Point Counter Options</h1>" +
-  generateOption("Allow opponents to disable point counter with !disable?",
-                 "",
-                 "allow_disable",
-                 "Allow disabling.",
-                 "Do not allow disabling.") +
-  generateOption("Change lobby status to announce you use point counter?",
-                 "Mandatory if disabling is not allowed.",
-                 "status_announce",
-                 "Post in status message.",
-                 "Do not post in status message.") +
-  generateOption("Always display counts / points?",
-                 "",
-                 "always_display",
-                 "Replace exit/faq with scores.",
-                 "Only display in chat box from !status command.");
-
-document.body.appendChild(element);
-loadOptions();
-
-$('#allow_disable_t').click(function() {
-  $('#status_announce_t').attr('disabled', false);
-  $('#status_announce_f').attr('disabled', false);
-})
-
-$('#allow_disable_f').click(function() {
-  localStorage["status_announce"] = "t";
-  $('#status_announce_t').attr('checked', true);
-  $('#status_announce_t').attr('disabled', true);
-  $('#status_announce_f').attr('disabled', true);
-})
+  localStorage.removeItem("log");
+  localStorage.removeItem("disabled");
+});

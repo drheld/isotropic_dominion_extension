@@ -307,6 +307,13 @@ function Player(name) {
     this.changeScore(pointsForCard(singular_card_name) * count);
     this.recordSpecialCounts(singular_card_name, card, count);
     this.recordCards(singular_card_name, count);
+
+    if (getOption('show_card_counts')) {
+      if (!setupPerPlayerCardCounts()) {
+        var id = '#' + cardId(this.id, singular_card_name);
+        $(id).text(this.card_counts[singular_card_name]);
+      }
+    }
   }
 }
 
@@ -378,6 +385,8 @@ function maybeHandleTurnChange(node) {
 
     if (last_player == null) {
       console.log("Failed to get player from: " + node.innerText);
+    } else {
+      $('#full_log :last').addClass(last_player.id);
     }
 
     possessed_turn = text.match(/\(possessed by .+\)/);
@@ -781,7 +790,7 @@ function initialize(doc) {
     disabled = true;
   }
 
-  if (!disabled && localStorage["always_display"] != "f") {
+  if (!disabled && getOption("always_display")) {
     updateScores();
     updateDeck();
   }
@@ -820,6 +829,7 @@ function initialize(doc) {
     }
     // Initialize the player.
     players[arr[i]] = new Player(arr[i]);
+    players[arr[i]].id = "player" + player_count;
 
     if (arr[i] != "You") {
       other_player_names.push(RegExp.quote(arr[i]));
@@ -838,6 +848,12 @@ function initialize(doc) {
         "(index is: " + self_index + ").");
     setTimeout("maybeIntroducePlugin()", wait_time);
   }
+
+  if (getOption('show_card_counts')) {
+    setupPerPlayerCardCounts();
+  }
+
+  $('#full_log').append('<div style="height: 60em"></div>');
 }
 
 function maybeRewriteName(doc) {
@@ -854,7 +870,7 @@ function maybeIntroducePlugin() {
     writeText("http://goo.gl/iDihS");
     writeText("Type !status to see the current score.");
     writeText("Type !details to see deck details for each player.");
-    if (localStorage["allow_disable"] != "f") {
+    if (getOption("allow_disable")) {
       writeText("Type !disable by turn 5 to disable the point counter.");
     }
   }
@@ -917,9 +933,7 @@ function handleChatText(speaker, text) {
   if (text == " !status") delayedRunCommand("maybeShowStatus");
   if (text == " !details") delayedRunCommand("maybeShowDetails");
 
-  if (localStorage["allow_disable"] != "f" &&
-      text == " !disable" &&
-      turn_number <= 5) {
+  if (getOption("allow_disable") && text == " !disable" && turn_number <= 5) {
     localStorage.setItem("disabled", "t");
     disabled = true;
     hideExtension();
@@ -948,6 +962,7 @@ function settingsString() {
   addSetting("always_display", settings);
   addSetting("allow_disable", settings);
   addSetting("name", settings);
+  addSetting("show_card_counts", settings);
   addSetting("status_announce", settings);
   addSetting("status_msg", settings);
   return JSON.stringify(settings);
@@ -1050,6 +1065,10 @@ function maybeStartOfGame(node) {
 // Returns true if the log node should be handled as part of the game.
 function logEntryForGame(node) {
   if (inLobby()) {
+    // Remove the log if we have one as we're not in a game.
+    if (localStorage.getItem("log") != undefined) {
+      localStorage.removeItem("log");
+    }
     return false;
   }
 
@@ -1072,9 +1091,9 @@ function restoreHistory(node) {
 
   // First build a DOM tree of the old log messages in a copy of the log.
   var log_entries = $('<pre id="temp"></pre>').html(logHistory).children();
-  for (log in log_entries) {
-    var entry = $(log_entries[log]);
-    if (entry.html() == node.innerHTML) break;
+  for (var i = 0; i < log_entries.length; ++i) {
+    var entry = $(log_entries[i]);
+    if (entry.text() == node.innerText) break;
     $('#full_log').append(entry.clone());
     handleLogEntry(entry[0]);
   }
@@ -1129,7 +1148,7 @@ function handle(doc) {
                      doc.childNodes[2].nodeValue);
     }
 
-    if (localStorage["always_display"] != "f") {
+    if (getOption("always_display")) {
       if (!disabled) {
         updateScores();
         updateDeck();
@@ -1162,7 +1181,7 @@ function buildStatusMessage() {
 }
 
 function enterLobby() {
-  if (localStorage["status_announce"] == "t" &&
+  if (getOption("status_announce") &&
       $('#lobby').length != 0 && $('#lobby').css('display') != "none") {
     // Set the original status message.
     writeText(buildStatusMessage());
