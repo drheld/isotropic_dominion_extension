@@ -15,6 +15,15 @@ function setupPerPlayerCardCounts() {
 
   if ($('#chat ~ a[href^="/mode/"]').text() == "images") {
     setupPerPlayerTextCardCounts();
+
+    // Setup the counts again whenever the table is recreated.
+    $("#supply").bind("DOMNodeInserted", function(e) {
+      if (e.target.constructor == HTMLTableElement) {
+        if ($('#player1_copper').length == 0) {
+          setupPerPlayerTextCardCounts();
+        }
+      }
+    });
   } else {
     setupPerPlayerImageCardCounts('kingdom');
     setupPerPlayerImageCardCounts('basic');
