@@ -70,7 +70,8 @@ function debugString(thing) {
 }
 
 function rewriteName(name) {
-  return name.replace(/ /g, "_").replace(/'/g, "’").replace(/\./g, "");
+  return name.replace(/ /g, "_").replace(/'/g, "’").replace(/\./g, "").
+              replace(/\|/g, "¦");
 }
 
 function handleError(text) {
@@ -794,8 +795,6 @@ function initialize(doc) {
   // before announcing the extension.
   var self_index = -1;
 
-  // Hack: collect player names with spaces and apostrophes in them. We'll
-  // rewrite them and then all the text parsing works as normal.
   var arr;
   if (doc.innerText == "Turn order is you.") {
     arr = [undefined, "you"];
@@ -817,6 +816,8 @@ function initialize(doc) {
       self_index = player_count;
       arr[i] = "You";
     }
+    // Hack: collect player names with special characters that hurt us. We'll
+    // rewrite them and then all the text parsing works as normal.
     var rewritten = rewriteName(arr[i]);
     if (rewritten != arr[i]) {
       player_rewrites[htmlEncode(arr[i])] = htmlEncode(rewritten);
