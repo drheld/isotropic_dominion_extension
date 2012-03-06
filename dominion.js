@@ -37,10 +37,7 @@ var turn_number = 0;
 // Last time a status message was printed.
 var last_status_print = 0;
 
-// The last player who gained a card.
-var last_gain_player = null;
-
-// Track scoping of actions in play such as Watchtower.
+// Track scoping to know currently "active" player.
 var scopes = [];
 
 // The version of the extension currently loaded.
@@ -299,7 +296,9 @@ function Player(name) {
           count + " " + card.innerText + "</div>");
     }
 
-    last_gain_player = this;
+    // Last scope should be this player.
+    scopes[scopes.length - 1] = this;
+
     count = parseInt(count);
     this.deck_size = this.deck_size + count;
 
@@ -402,25 +401,18 @@ function maybeHandleTurnChange(node) {
 }
 
 function handleScoping(text_arr, text) {
-  var depth = 1;
+  // Ignore debug output.
+  if (text_arr[0] == "***") return;
+
+  var depth = 0;
   for (var t in text_arr) {
     if (text_arr[t] == "...") ++depth;
   }
-  var scope = '';
-  while (depth <= scopes.length) {
-    scope = scopes.pop();
+  while (depth < scopes.length) {
+    scopes.pop();
   }
-  if (text.indexOf("revealing a Watchtower") != -1 ||
-      text.indexOf("You reveal a Watchtower") != -1) {
-    scope = 'Watchtower';
-  } else {
-    var re = new RegExp("You|" + player_re + "plays? an? ([^.]*).");
-    var arr = text.match(re);
-    if (arr && arr.length == 2) {
-      scope = arr[1];
-    }
-  }
-  scopes.push(scope);
+
+  scopes.push(getPlayer(text_arr[depth]));
 }
 
 function maybeReturnToSupply(text) {
@@ -636,7 +628,7 @@ function handleLogEntry(node) {
   var text = node.innerText.split(" ");
 
   // Keep track of what sort of scope we're in for things like watchtower.
-  handleScoping(text, node.innerText);
+  handleScoping(text);
 
   // Gaining VP could happen in combination with other stuff.
   maybeHandleVp(node.innerText);
@@ -669,8 +661,8 @@ function handleLogEntry(node) {
 
   if (text[0] == "trashing") {
     var player = last_player;
-    if (scopes[scopes.length - 1] == "Watchtower") {
-      player = last_gain_player;
+    if (scopes.length >= 2 && scopes[scopes.length - 2] != null) {
+      player = scopes[scopes.length - 2];
     }
     return handleGainOrTrash(player, elems, node.innerText, -1);
   }
@@ -678,7 +670,11 @@ function handleLogEntry(node) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, -1);
   }
   if (text[0] == "gaining") {
-    return handleGainOrTrash(last_player, elems, node.innerText, 1);
+    var player = last_player;
+    if (scopes.length >= 2 && scopes[scopes.length - 2] != null) {
+      player = scopes[scopes.length - 2];
+    }
+    return handleGainOrTrash(player, elems, node.innerText, 1);
   }
   if (text[1].indexOf("gain") == 0) {
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
@@ -778,7 +774,6 @@ function initialize(doc) {
   announced_error = false;
   turn_number = 0;
 
-  last_gain_player = null;
   scopes = [];
 
   players = new Object();
