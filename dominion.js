@@ -70,7 +70,7 @@ function debugString(thing) {
 }
 
 function rewriteName(name) {
-  return name.replace(/ /g, "_").replace(/'/g, "’").replace(/\./g, "").
+  return name.replace(/ /g, "_").replace(/'/g, "’").replace(/\./g, "۔").
               replace(/\|/g, "¦");
 }
 
