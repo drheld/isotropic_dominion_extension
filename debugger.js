@@ -15,25 +15,22 @@ for (var i = 0; i < game.childNodes.length; ++i) {
   var turn_change = node.innerText && node.innerText.match(/—.*—/);
   handle(game.childNodes[i]);
   if (turn_change) {
-    detailed_results.push(debug_gain_messages);
-    debug_gain_messages = '';
-    detailed_results.push(stateStrings());
+    detailed_results.push(stateStrings() + '<br><br>');
 
     var jump = turn_number - last_turn_number;
     if (jump != 0 && jump != 1) turn_jump = turn_number;
     last_turn_number = turn_number;
-
-    // Show this turn's information.
-    detailed_results.push('<br><i>' + game.childNodes[i].innerText + '</i><br>');
   } else {
     var gains = $('div.gain_debug');
     for (var j = 0; j < gains.length; ++j) {
       gains[j].className = 'gain_details';
       game.insertBefore(gains[j], game.childNodes[i].nextSibling);
       i++;
-      debug_gain_messages += gains[j].innerHTML + '<br>';
     }
   }
+
+  // Show this turn's information.
+  detailed_results.push('<i>' + game.childNodes[i].innerText + '</i><br>');
 }
 $('#detailed_results').append(detailed_results.join('') + '<br><br>');
 
