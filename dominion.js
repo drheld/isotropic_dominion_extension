@@ -32,6 +32,10 @@ var last_player = null;
 var last_reveal_player = null;
 var last_reveal_card = null;
 
+// TODO(drheld): Remove this.
+// Hack currently needed due to lack of info with embargo + trader.
+var last_gain_card = null;
+
 var turn_number = 0;
 
 // Last time a status message was printed.
@@ -308,6 +312,8 @@ function Player(name) {
     this.recordSpecialCounts(singular_card_name, card, count);
     this.recordCards(singular_card_name, count);
 
+    last_gain_card = singular_card_name;
+
     if (getOption('show_card_counts')) {
       if (!setupPerPlayerCardCounts()) {
         var id = '#' + cardId(this.id, singular_card_name);
@@ -549,6 +555,12 @@ function maybeHandleTournament(elems, text_arr, text) {
 
 function maybeHandleTrader(elems, text_arr, text) {
   if (elems.length == 3 && text.match(/a Trader to gain a Silver/)) {
+    if (getSingularCardName(elems[2].innerText) == "Curse" &&
+        last_gain_card != "Curse") {
+      // HACK: There is no message about gaining the curse so don't lose it.
+      return true;
+    }
+
     getPlayer(text_arr[0]).gainCard(elems[2], -1);
     return true;
   }
