@@ -832,7 +832,15 @@ function initialize(doc) {
   scopes = [];
 
   players = new Object();
+
+  // Setup the player rewrites. Just add self for now.
   player_rewrites = new Object();
+  var my_name = localStorage["name"];
+  var rewritten = rewriteName(my_name);
+  if (rewritten != my_name) {
+    player_rewrites[htmlEncode(my_name)] = htmlEncode(rewritten);
+  }
+
   player_re = "";
   player_count = 0;
 
