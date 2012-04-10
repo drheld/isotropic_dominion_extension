@@ -48,6 +48,7 @@ var scopes = [];
 var extension_version = 'Unknown';
 
 var restoring_log = false;
+var ignore_events = false;
 
 // Quotes a string so it matches literally in a regex.
 RegExp.quote = function(str) {
@@ -141,8 +142,9 @@ function pointsForCard(card_name) {
   return 0;
 }
 
-function Player(name) {
+function Player(name, original_name) {
   this.name = name;
+  this.original_name = original_name;
   this.score = 3;
   this.deck_size = 10;
 
@@ -396,6 +398,7 @@ function maybeHandleTurnChange(node) {
 
       // Hack: collect player names with special characters that hurt us. We'll
       // rewrite them and then all the text parsing works as normal.
+      var original_name = last_player_name;
       var rewritten = rewriteName(last_player_name);
       if (rewritten != last_player_name) {
         player_rewrites[htmlEncode(last_player_name)] = htmlEncode(rewritten);
@@ -404,7 +407,7 @@ function maybeHandleTurnChange(node) {
       }
 
       // Initialize the player.
-      players[rewritten] = new Player(rewritten);
+      players[rewritten] = new Player(last_player_name, original_name);
       players[rewritten].id = "player" + player_count;
 
       // Update the regex of all other players.
@@ -772,10 +775,15 @@ function handleLogEntry(node) {
   }
 }
 
+function playerString(player, text) {
+  return " <span class=" + player.id + ">" +
+         player.original_name + "=" + text + "</span>";
+}
+
 function getScores() {
   var scores = "Points: ";
   for (var player in players) {
-    scores = scores + " " + player + "=" + players[player].getScore();
+    scores += playerString(players[player], players[player].getScore());
   }
   return scores;
 }
@@ -787,13 +795,15 @@ function updateScores() {
     points_spot = spot[0];
     return;
   }
+  ignore_events = true;
   points_spot.innerHTML = getScores();
+  ignore_events = false;
 }
 
 function getDecks() {
   var decks = "Cards: ";
   for (var player in players) {
-    decks = decks + " " + player + "=" + players[player].getDeckString();
+    decks += playerString(players[player], players[player].getDeckString());
   }
   return decks;
 }
@@ -804,7 +814,9 @@ function updateDeck() {
     if (spot.length != 1) return;
     deck_spot = spot[0];
   }
+  ignore_events = true;
   deck_spot.innerHTML = getDecks();
+  ignore_events = false;
 }
 
 function initialize(doc) {
@@ -1127,6 +1139,8 @@ function inLobby() {
 }
 
 function handle(doc) {
+  if (ignore_events) return;
+
   // When the lobby screen is built, make sure point tracker settings are used.
   if (doc.className && doc.className == "constr") {
     $('#tracker').attr('checked', true).attr('disabled', true);
