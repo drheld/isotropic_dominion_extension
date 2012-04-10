@@ -377,20 +377,50 @@ function maybeHandleTurnChange(node) {
     var maybe_number = text.match(/([0-9]+) —/);
     if (maybe_number) turn_number = maybe_number[1];
 
+    var last_player_name = '';
     // This must be a turn start.
     if (text.match(/— Your (?:extra )?turn/)) {
-      last_player = getPlayer("You");
+      last_player_name = 'You';
     } else {
       var arr = text.match(/— (.+)'s .*turn/);
       if (arr && arr.length == 2) {
-        last_player = getPlayer(arr[1]);
+        last_player_name = arr[1];
       } else {
         handleError("Couldn't handle turn change: " + text);
       }
     }
 
+    // First turn for a player. Create them.
+    if (turn_number == 1) {
+      player_count++;
+
+      // Hack: collect player names with special characters that hurt us. We'll
+      // rewrite them and then all the text parsing works as normal.
+      var rewritten = rewriteName(last_player_name);
+      if (rewritten != last_player_name) {
+        player_rewrites[htmlEncode(last_player_name)] = htmlEncode(rewritten);
+        last_player_name = rewritten;
+        maybeRewriteName(node);
+      }
+
+      // Initialize the player.
+      players[rewritten] = new Player(rewritten);
+      players[rewritten].id = "player" + player_count;
+
+      // Update the regex of all other players.
+      var other_player_names = [];
+      for (player in players) {
+        var player = players[player];
+        if (player.name != "You") {
+          other_player_names.push(RegExp.quote(player.name));
+        }
+        player_re = '(' + other_player_names.join('|') + ')';
+      }
+    }
+
+    last_player = getPlayer(last_player_name);
     if (last_player == null) {
-      console.log("Failed to get player from: " + node.innerText);
+      console.log("Failed to get player from: " + last_player_name);
     } else {
       $('#full_log :last').addClass(last_player.id);
     }
@@ -822,28 +852,11 @@ function initialize(doc) {
   var other_player_names = [];
   for (var i = 1; i < arr.length; ++i) {
     if (arr[i] == undefined) continue;
-
-    player_count++;
     if (arr[i] == "you") {
       self_index = player_count;
-      arr[i] = "You";
-    }
-    // Hack: collect player names with special characters that hurt us. We'll
-    // rewrite them and then all the text parsing works as normal.
-    var rewritten = rewriteName(arr[i]);
-    if (rewritten != arr[i]) {
-      player_rewrites[htmlEncode(arr[i])] = htmlEncode(rewritten);
-      arr[i] = rewritten;
-    }
-    // Initialize the player.
-    players[arr[i]] = new Player(arr[i]);
-    players[arr[i]].id = "player" + player_count;
-
-    if (arr[i] != "You") {
-      other_player_names.push(RegExp.quote(arr[i]));
+      break;
     }
   }
-  player_re = '(' + other_player_names.join('|') + ')';
 
   // Assume it's already introduced if it's rewriting the tree for a reload.
   // Otherwise setup to maybe introduce the extension.
@@ -919,8 +932,8 @@ function storeLog() {
 }
 
 function hideExtension() {
-  deck_spot.innerHTML = "exit";
-  points_spot.innerHTML = "faq";
+  if (deck_spot) deck_spot.innerHTML = "exit";
+  if (points_spot) points_spot.innerHTML = "faq";
   $('#log').show();
   $('#full_log').hide();
 }
