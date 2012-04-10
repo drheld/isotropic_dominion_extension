@@ -6,9 +6,8 @@ function cardId(player_id, card_name) {
 // Sets up the per player card count layout.
 // Returns true if this call set it up, or false if it was already setup.
 function setupPerPlayerCardCounts() {
-  if (!getOption("show_card_counts")) {
-    return true;
-  }
+  if (!getOption("show_card_counts")) return true;
+  if (turn_number < 2) return true;
 
   // Make sure things aren't already setup.
   if ($('#player1_copper').length != 0) return false;
