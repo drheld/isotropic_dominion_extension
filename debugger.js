@@ -1,38 +1,23 @@
-$('#results').append('<div id="detailed_results"></div>');
-$('#detailed_results').css('display', 'none');
-
 debug_mode = true;
 
 var last_turn_number = 0;
 var turn_jump = '';
 
 $('#log').remove();
-var game = $('#full_log').attr('id', 'log')[0];
-var detailed_results = [];
-var debug_gain_messages = [];
-for (var i = 0; i < game.childNodes.length; ++i) {
-  var node = game.childNodes[i];
+var game_nodes = $('#full_log').attr('id', 'log').children();
+for (var i = 0; i < game_nodes.length; ++i) {
+  var node = game_nodes[i];
   var turn_change = node.innerText && node.innerText.match(/—.*—/);
-  handle(game.childNodes[i]);
+  handle(node);
   if (turn_change) {
-    detailed_results.push(stateStrings() + '<br><br>');
-
+    $('#full_log').children().eq(-1).before(
+        '<div class="details">' + stateStrings() + '<br><br></div>');
     var jump = turn_number - last_turn_number;
     if (jump != 0 && jump != 1) turn_jump = turn_number;
     last_turn_number = turn_number;
-  } else {
-    var gains = $('div.gain_debug');
-    for (var j = 0; j < gains.length; ++j) {
-      gains[j].className = 'gain_details';
-      game.insertBefore(gains[j], game.childNodes[i].nextSibling);
-      i++;
-    }
   }
-
-  // Show this turn's information.
-  detailed_results.push('<i>' + game.childNodes[i].innerText + '</i><br>');
 }
-$('#detailed_results').append(detailed_results.join('') + '<br><br>');
+$('.details').css('display', 'none');
 
 $('#results').append(stateStrings());
 console.log(players);
@@ -43,13 +28,14 @@ if (turn_jump != "") {
   $('#turn_jump').css("font-weight", "bold");
 }
 
-$('body').append('<button id="show_details">Show Details</button>');
-$('#show_details').click(function () {
-  $('#detailed_results').css('display', '');
-});
-$('body').append('<button id="show_raw_log">Show Raw Logs</button>');
+$('body').append('<button id="show_raw_log">Show Raw Log</button>');
 $('#show_raw_log').click(function () {
   $('#log_data').css('display', '');
+});
+$('body').append('<button id="show_details">Show Details</button>');
+$('#show_details').click(function () {
+  $('#log_data').css('display', '');
+  $('.details').css('display', '');
 });
 
 var url = $('#game_link').attr('href')
