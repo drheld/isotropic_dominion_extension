@@ -38,6 +38,9 @@ var last_gain_card = null;
 
 var turn_number = 0;
 
+// Queued up events in the first turn only.
+var to_process = [];
+
 // Last time a status message was printed.
 var last_status_print = 0;
 
@@ -419,6 +422,14 @@ function maybeHandleTurnChange(node) {
         }
         player_re = '(' + other_player_names.join('|') + ')';
       }
+      setupPerPlayerCardCounts();
+    }
+
+    if (turn_number == 2) {
+      for (item in to_process) {
+        processLogEntry(to_process[item]);
+      }
+      to_process = [];
     }
 
     last_player = getPlayer(last_player_name);
@@ -664,6 +675,10 @@ function handleLogEntry(node) {
   if (!started) return;
 
   maybeAddToFullLog(node);
+  processLogEntry(node);
+}
+
+function processLogEntry(node) {
   maybeRewriteName(node);
 
   if (maybeHandleTurnChange(node)) return;
@@ -723,7 +738,20 @@ function handleLogEntry(node) {
     return handleGainOrTrash(player, elems, node.innerText, 1);
   }
   if (text[1].indexOf("gain") == 0) {
+    var player = getPlayer(text[0]);
+    // If the player is missing it might be because it's the first turn. Defer.
+    if (player == null && turn_number == 1) {
+      to_process.push(node);
+      return;
+    }
     return handleGainOrTrash(getPlayer(text[0]), elems, node.innerText, 1);
+  }
+
+  // There might be a gain on a player with spaces, etc, so defer this case if
+  // it's the first turn.
+  if (turn_number == 1 && node.innerText.indexOf(" gains ") != -1) {
+    to_process.push(node);
+    return;
   }
 
   var player = getPlayer(text[0]);
@@ -829,6 +857,8 @@ function initialize(doc) {
   announced_error = false;
   turn_number = 0;
 
+  to_process = [];
+
   scopes = [];
 
   players = new Object();
@@ -836,9 +866,11 @@ function initialize(doc) {
   // Setup the player rewrites. Just add self for now.
   player_rewrites = new Object();
   var my_name = localStorage["name"];
-  var rewritten = rewriteName(my_name);
-  if (rewritten != my_name) {
-    player_rewrites[htmlEncode(my_name)] = htmlEncode(rewritten);
+  if (my_name) {
+    var rewritten = rewriteName(my_name);
+    if (rewritten != my_name) {
+      player_rewrites[htmlEncode(my_name)] = htmlEncode(rewritten);
+    }
   }
 
   player_re = "";
