@@ -952,7 +952,17 @@ function maybeIntroducePlugin() {
 function maybeShowStatus(request_time) {
   if (last_status_print < request_time) {
     last_status_print = new Date().getTime();
-    var to_show = ">> " + getDecks() + " | " + getScores();
+
+    // Build up a string to show.
+    var to_show = " >> Decks: ";
+    for (var player in players) {
+      to_show += " " + players[player].name + "=" + players[player].getDeckString();
+    }
+    to_show += " | Points: "
+    for (var player in players) {
+      to_show += " " + players[player].name + "=" + players[player].getScore();
+    }
+
     var my_name = localStorage["name"];
     if (my_name == undefined || my_name == null) my_name = "Me";
     writeText(to_show.replace(/You=/g, my_name + "="));
