@@ -600,14 +600,14 @@ function maybeHandleTournament(elems, text_arr, text) {
 
 function maybeHandleTrader(elems, text_arr, text) {
   if (elems.length == 3 && text.match(/a Trader to gain a Silver/)) {
-    if (getSingularCardName(elems[2].innerText) == "Curse") {
-      var found = false;
-      for (card in turn_gain_cards) {
-        if (turn_gain_cards[card] == "Curse") found = true;
-      }
-      // HACK: There is no message about gaining the curse so don't lose it.
-      if (!found) return true;
+    var instead_of = getSingularCardName(elems[2].innerText);
+    var found = false;
+    for (card in turn_gain_cards) {
+      if (turn_gain_cards[card] == instead_of) found = true;
     }
+    // HACK: There is no message about gaining cards sometimes. If it hasn't
+    // been gained this turn, assume it wasn't shown so don't lose it.
+    if (!found) return true;
 
     getPlayer(text_arr[0]).gainCard(elems[2], -1);
     return true;
