@@ -1214,6 +1214,13 @@ function setupLobby() {
   $('#amveto').change(function() {
     localStorage['veto_mode'] = $(this).val();
   });
+
+  // Retain settings for opponents.
+  var within = localStorage['opponent_within'];
+  if (within != undefined) $('#within').val(within);
+  $('#within').change(function() {
+    localStorage['opponent_within'] = $(this).val();
+  });
 }
 
 function handle(doc) {
