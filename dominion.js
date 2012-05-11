@@ -1192,13 +1192,36 @@ function inLobby() {
   return $('#lobby').length != 0 && $('#lobby').css('display') != "none";
 }
 
+function setupLobby() {
+  $('#tracker').attr('checked', true).attr('disabled', true);
+  $('#autotracker').val('yes').attr('disabled', true);
+
+  // Retain settings for auto match bias.
+  $('.setcheck').each(function() {
+    var bias_name = 'bias_' + $(this).attr('id');
+    if (getOption(bias_name)) $(this).attr('checked', true);
+    $(this).change(function() {
+      if ($(this).attr('checked')) localStorage[bias_name] = 'true';
+      else localStorage.removeItem(bias_name);
+    });
+  });
+
+  // Retain settings for veto.
+  var veto_mode = localStorage['veto_mode'];
+  if (veto_mode == 'yes' || veto_mode == 'no' || veto_mode == 'maybe') {
+    $('#amveto').val(veto_mode);
+  }
+  $('#amveto').change(function() {
+    localStorage['veto_mode'] = $(this).val();
+  });
+}
+
 function handle(doc) {
   if (ignore_events) return;
 
   // When the lobby screen is built, make sure point tracker settings are used.
   if (doc.className && doc.className == "constr") {
-    $('#tracker').attr('checked', true).attr('disabled', true);
-    $('#autotracker').val('yes').attr('disabled', true);
+    setupLobby();
   }
 
   try {
