@@ -73,6 +73,8 @@ function growHeaderColumns() {
 
 // Set up the card count cells for all players in text mode.
 function setupPerPlayerTextCardCounts() {
+  if (disabled) return;
+
   // For each row in the supply table, add a column count cell for each player.
   $(".txcardname").each(function() {
     var $this = $(this);
@@ -97,6 +99,8 @@ function setupPerPlayerTextCardCounts() {
 
 // Set up the per-player card counts in image mode for a given column.
 function setupPerPlayerImageCardCounts(region) {
+  if (disabled) return;
+
   var selector = '.' + region + '-column';
 
   // make "hr" rows span all columns
