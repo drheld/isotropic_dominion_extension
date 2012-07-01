@@ -22,7 +22,7 @@ var show_action_count = false;
 var show_unique_count = false;
 var show_victory_count = false;
 var show_duchy_count = false;
-var possessed_turn = false;
+var possessed_turn = null;
 var announced_error = false;
 
 // Enabled by debugger when analyzing game logs.
@@ -297,6 +297,13 @@ function Player(name, original_name) {
   }
 
   this.gainCard = function(card, count) {
+    // Hack: Border Village doesn't print well under possession.
+    if (possessed_turn &&
+        possessed_turn != this &&
+        turn_gain_cards[turn_gain_cards.length - 1] == "Border Village") {
+      possessed_turn.gainCard(card, count);
+    }
+
     // You can't gain or trash cards while possessed.
     if (possessed_turn && this == last_player) return;
 
@@ -432,6 +439,7 @@ function maybeHandleTurnChange(node) {
       to_process = [];
     }
 
+    var previous_player = last_player;
     last_player = getPlayer(last_player_name);
     if (last_player == null) {
       console.log("Failed to get player from: " + last_player_name);
@@ -439,7 +447,12 @@ function maybeHandleTurnChange(node) {
       $('#full_log :last').addClass(last_player.id);
     }
 
-    possessed_turn = text.match(/\(possessed by .+\)/);
+    var is_possessed_turn = text.match(/\(possessed by .+\)/);
+    if (is_possessed_turn) {
+      possessed_turn = previous_player;
+    } else {
+      possessed_turn = null;
+    }
 
     if (debug_mode) {
       var details = " (" + getDecks() + " | " + getScores() + ")";
@@ -469,7 +482,7 @@ function handleScoping(text_arr, text) {
 
 function maybeReturnToSupply(text) {
   possessed_turn_backup = possessed_turn;
-  possessed_turn = false;
+  possessed_turn = null;
 
   var ret = false;
   if (text.indexOf("it to the supply") != -1) {
@@ -779,7 +792,7 @@ function processLogEntry(node) {
     player.gainCard(card, count);
   } else if (action.indexOf("pass") == 0) {
     possessed_turn_backup = possessed_turn;
-    possessed_turn = false;
+    possessed_turn = null;
     if (possessed_turn && this == last_player) return;
     if (player_count != 2) {
       maybeAnnounceFailure(">> Warning: Masquerade with more than 2 players " +
@@ -795,7 +808,7 @@ function processLogEntry(node) {
     possessed_turn = possessed_turn_backup;
   } else if (action.indexOf("receive") == 0) {
     possessed_turn_backup = possessed_turn;
-    possessed_turn = false;
+    possessed_turn = null;
     player.gainCard(card, 1);
     var other_player = findTrailingPlayer(node.innerText);
     if (other_player == null) {
@@ -857,7 +870,7 @@ function initialize(doc) {
   i_introduced = false;
   disabled = false;
   had_error = false;
-  possessed_turn = false;
+  possessed_turn = null;
   announced_error = false;
   turn_number = 0;
 
