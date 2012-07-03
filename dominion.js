@@ -956,8 +956,8 @@ function maybeRewriteName(doc) {
 
 function maybeIntroducePlugin() {
   if (!introduced && !disabled) {
-    writeText("★ Game scored by Dominion Point Counter ★");
-    writeText("http://goo.gl/iDihS");
+    writeText("★ Cards counted by Dominion Point Counter ★");
+    writeText("http://goo.gl/iDihS (screenshot: http://goo.gl/G9BTQ)");
     writeText("Type !status to see the current score.");
     writeText("Type !details to see deck details for each player.");
     if (getOption("allow_disable")) {
